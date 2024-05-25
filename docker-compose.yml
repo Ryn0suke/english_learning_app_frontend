@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/frontend
+    command: sh -c "cd frontend &&PORT=3001 yarn start"
+    ports:
+      - "3001:3001"
