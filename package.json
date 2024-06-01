@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@material-ui/lab": "^4.0.0-alpha.61",
+    "axios": "^1.7.2",
+    "axios-case-converter": "^1.1.1",
+    "js-cookie": "^3.0.5",
+    "react-router-dom": "^6.23.1"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/js-cookie": "^3.0.6",
+    "@types/react-router-dom": "^5.3.3"
+  }
+}
