@@ -22,3 +22,9 @@ export interface User {
     created_at: Date
     updated_at: Date
 };
+
+export interface Phrase {
+    id: number
+    japanese: string
+    english: string
+};

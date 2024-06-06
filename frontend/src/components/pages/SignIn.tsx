@@ -58,7 +58,7 @@ const SignIn: React.FC = () => {
     const params: SignInParams = {
       email: email,
       password: password
-    }
+    };
 
     try {
       const res = await signIn(params);

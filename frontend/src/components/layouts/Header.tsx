@@ -1,43 +1,58 @@
-import React from 'react';
-import { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Cookies from 'js-cookie';
 
-import { Icon, makeStyles, Theme } from '@material-ui/core';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
+import HomeIcon from '@material-ui/icons/Home';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
 import MenuIcon from '@material-ui/icons/Menu';
+import Drawer from '@material-ui/core/Drawer';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Box from '@material-ui/core/Box';
+import Divider from '@material-ui/core/Divider';
 
 import { signOut } from 'lib/api/auth';
 import { AuthContext } from 'App';
 
 const useStyles = makeStyles((theme: Theme) => ({
-    iconButton: {
-        marginRight: theme.spacing(2),
+    menuButton: {
+        position: 'fixed',
+        top: theme.spacing(1),
+        left: theme.spacing(1),
+        zIndex: 1300,
+        width: '60px',
+        height: '60px',
     },
-    title: {
-        flexGrow: 1,
-        textDecoration: 'none',
-        color: 'inherit'
-      },
     linkBtn: {
         textTransform: 'none'
+    },
+    menuIcon: {
+        fontSize: '2.5rem',
     }
 }));
 
 const Header: React.FC = () => {
     const { loading, isSignedIn, setIsSignedIn } = useContext(AuthContext);
     const classes = useStyles();
+    const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    const handleSignOut = async(e: React.MouseEvent<HTMLButtonElement>) => {
-        try{
+    const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+        if (event.type === 'keydown' && ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')) {
+            return;
+        }
+        setDrawerOpen(open);
+    };
+
+    const handleSignOut = async () => {
+        try {
             const res = await signOut();
 
-            if(res.data.success === true) {
+            if (res.data.success === true) {
                 Cookies.remove('_access_token');
                 Cookies.remove('_client');
                 Cookies.remove('_uid');
@@ -48,75 +63,75 @@ const Header: React.FC = () => {
             } else {
                 console.log('サインアウト失敗');
             }
-        } catch(err) {
+        } catch (err) {
             console.log(err);
         }
     };
 
-    const AuthButtons = () => {
-        if(!loading) {
-            if(isSignedIn) {
-                return(
-                    <Button
-                        color='inherit'
-                        className={classes.linkBtn}
-                        onClick={handleSignOut}
-                    >
-                        Sign out
-                    </Button>
-                )
-            } else {
-                return (
+    const drawerList = (
+        <Box
+            sx={{ width: 250 }}
+            role="presentation"
+            onClick={toggleDrawer(false)}
+            onKeyDown={toggleDrawer(false)}
+        >
+            <List>
+                {!loading && (
                     <>
-                        <Button
-                            component={Link}
-                            to='/signin'
-                            color='inherit'
-                            className={classes.linkBtn}
-                        >
-                            Sign in
-                        </Button>
-                        <Button
-                            component={Link}
-                            to='/signup'
-                            color='inherit'
-                            className={classes.linkBtn}
-                        >
-                            Sign up
-                        </Button>
+                        {isSignedIn ? (
+                            <>
+                                <ListItem button component={Link} to="/">
+                                    {/* <HomeIcon /> */}
+                                    <ListItemText primary="Home" />
+                                </ListItem>
+                                <ListItem button onClick={() => handleSignOut()}>
+                                    {/* <ExitToAppIcon /> */}
+                                    <ListItemText primary="Sign out" />
+                                </ListItem> 
+                                <ListItem button component={Link} to="/phrases">
+                                    <ListItemText primary="Phrases" />
+                                </ListItem>                             
+                            </>
+                        ) : (
+                            <>
+                                <ListItem button component={Link} to="/">
+                                    <ListItemText primary="Home" />
+                                </ListItem>
+                                <Divider />
+                                <ListItem button component={Link} to="/signin">
+                                    {/* <LockOpenIcon /> */}
+                                    <ListItemText primary="Sign in" />
+                                </ListItem>
+                                <ListItem button component={Link} to="/signup">
+                                    <ListItemText primary="Sign up" />
+                                </ListItem>
+                            </>
+                        )}
                     </>
-                );
-            }
-        } else {
-            return <></>;
-        }
-    };
+                )}
+                <ListItem button component={Link} to="/test">
+                    <ListItemText primary="Test" />
+                </ListItem>
+            </List>
+        </Box>
+    );
 
     return (
-        <>
-            <AppBar position='static'>
-                <Toolbar>
-                    <IconButton
-                        edge='start'
-                        className={classes.iconButton}
-                        color='inherit'
-                    >
-                        <MenuIcon />
-                    </IconButton>
-                    <Typography
-                        component={Link}
-                        to='/'
-                        variant='h6'
-                        className={classes.title}
-                    >
-                        Sample
-                    </Typography>
-                    <AuthButtons />
-                </Toolbar>
-            </AppBar>
-        </>
-    )
+        <div>
+            <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="menu"
+                onClick={toggleDrawer(true)}
+                className={classes.menuButton}
+            >
+                <MenuIcon className={classes.menuIcon} />
+            </IconButton>
+            <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
+                {drawerList}
+            </Drawer>
+        </div>
+    );
 };
 
 export default Header;
-
