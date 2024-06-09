@@ -23,8 +23,14 @@ export interface User {
     updated_at: Date
 };
 
+export interface Tag {
+    id?: number
+    name: string
+};
+
 export interface Phrase {
     id: number
     japanese: string
     english: string
+    tags?: Tag[]
 };

@@ -18,11 +18,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import Modal from 'react-modal';
 import RegisterAndSearchModal from 'components/modals/Phrases/RegisterAndSearchModal';
 
-// interface Phrase {
-//     'id': number
-//     'japanese': string
-//     'english': string
-// };
+
 
 const useStyles = makeStyles({
     table: {
@@ -49,7 +45,7 @@ const useStyles = makeStyles({
 
 const Phrases: React.FC = () => {
 
-    const { isSignedIn, currentUser } = useContext(AuthContext);
+    const { currentUser } = useContext(AuthContext);
     const [phrases, setPhrases] = useState<Phrase[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPage, setTotalPage] = useState<number>(1);
@@ -63,9 +59,11 @@ const Phrases: React.FC = () => {
                 return;
             }
             const res = await viewAllPhrases(currentUser.id, page);
+            console.log(res.data)
             setPhrases(res.data.phrases);
             setTotalPage(res.data.total_pages);
             console.log(res);
+            console.log(phrases);
         } catch (err) {
             console.log(err);
         }
@@ -99,6 +97,15 @@ const Phrases: React.FC = () => {
 
     console.log(currentUser);
 
+    phrases.map((row) => {
+        // console.log(row.tags);
+        if (row.tags !== undefined) {
+            row.tags.map((tag) => {
+                console.log(tag.name);
+            })
+        }
+    })
+
     return (
         <>
         <Button className={classes.button} onClick={() => setModalIsOpen(true)}>登録・検索</Button>
@@ -111,11 +118,12 @@ const Phrases: React.FC = () => {
                     <TableRow>
                         <TableCell>日本語</TableCell>
                         <TableCell>英語</TableCell>
+                        <TableCell>タグ</TableCell>
                         <TableCell>削除</TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {phrases.map((row) => (
+                    {phrases?.map((row) => (
                         <TableRow key={row.id}>
                             <TableCell component='th' scope='row'>
                                 {row.japanese}
@@ -123,6 +131,17 @@ const Phrases: React.FC = () => {
                             <TableCell component='th' scope='row'>
                                 {row.english}
                             </TableCell>
+                            <TableCell component='th' scope='row'>
+                            {row.tags !== undefined ? (
+                                row.tags.map((tag) => (
+                                <div key={tag.id}>{tag.name}</div>
+                                ))
+                            ) : (
+                                <div></div>
+                            )}
+                            </TableCell>
+
+
                             <TableCell>
                                 <Button className={classes.button} variant='contained' onClick={() => handleDeletePhrase(row.id)}>
                                     <DeleteIcon />
