@@ -32,5 +32,5 @@ export interface Phrase {
     id: number
     japanese: string
     english: string
-    tags?: Tag[]
+    tags: Tag[]
 };

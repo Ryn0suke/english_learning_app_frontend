@@ -7,19 +7,19 @@ import Search from './Search';
 import CloseIcon from '@material-ui/icons/Close';
 
 interface ModalProps {
-    modalIsOpen: boolean
-    setModalIsOpen: (isOpen: boolean) => void
+    registerModalIsOpen: boolean
+    setRegisterModalIsOpen: (isOpen: boolean) => void
     recieveAllPhrases: (page: number) => Promise<void>
     currentPage: number
 };
 
-const RegisterAndSearchModal: React.FC<ModalProps> = ({ modalIsOpen, setModalIsOpen, recieveAllPhrases, currentPage }) => {
+const RegisterAndSearchModal: React.FC<ModalProps> = ({ registerModalIsOpen, setRegisterModalIsOpen, recieveAllPhrases, currentPage }) => {
     const [isRegisterMode, setIsResigterMode] = useState<boolean>(true);
 
     return(
         <>
-            <Modal isOpen={modalIsOpen} >
-                <Button onClick={() => setModalIsOpen(false)}>
+            <Modal isOpen={registerModalIsOpen} >
+                <Button onClick={() => setRegisterModalIsOpen(false)}>
                     <CloseIcon />
                 </Button>
                 <Button onClick={() => setIsResigterMode(true)}>登録</Button>

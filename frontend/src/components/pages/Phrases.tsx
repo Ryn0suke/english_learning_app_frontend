@@ -13,10 +13,12 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import DeleteIcon from '@material-ui/icons/Delete';
+import Chip from '@material-ui/core/Chip'
+
 
 import Modal from 'react-modal';
 import RegisterAndSearchModal from 'components/modals/Phrases/RegisterAndSearchModal';
+import UpdateModal from 'components/modals/Phrases/UpdateModal';
 
 
 
@@ -50,7 +52,9 @@ const Phrases: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [totalPage, setTotalPage] = useState<number>(1);
     const pageNumbers: number[] = [...new Array(totalPage).keys()].map(number => ++number).slice(Math.max(0, currentPage - 6), Math.min(totalPage, currentPage + 4));
-    const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
+    const [registerModalIsOpen, setRegisterModalIsOpen] = useState<boolean>(false);
+    const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false);
+    const [selectedPhrase, setSelectedPhrase] = useState<Phrase>({id: -1, japanese: '', english: '', tags:[]});
 
     const recieveAllPhrases = async (page:number) => {
         try {
@@ -108,9 +112,9 @@ const Phrases: React.FC = () => {
 
     return (
         <>
-        <Button className={classes.button} onClick={() => setModalIsOpen(true)}>登録・検索</Button>
+        <Button className={classes.button} onClick={() => setRegisterModalIsOpen(true)}>登録・検索</Button>
 
-        <RegisterAndSearchModal modalIsOpen={modalIsOpen} setModalIsOpen={setModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage}/>
+        <RegisterAndSearchModal registerModalIsOpen={registerModalIsOpen} setRegisterModalIsOpen={setRegisterModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage}/>
 
         <TableContainer component={Paper}>
             <Table className={classes.table} aria-label='phrase table'>
@@ -119,12 +123,12 @@ const Phrases: React.FC = () => {
                         <TableCell>日本語</TableCell>
                         <TableCell>英語</TableCell>
                         <TableCell>タグ</TableCell>
-                        <TableCell>削除</TableCell>
+                        {/* <TableCell>削除</TableCell> */}
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {phrases?.map((row) => (
-                        <TableRow key={row.id}>
+                        <TableRow key={row.id} onClick={() => {setUpdateModalIsOpen(true); setSelectedPhrase({id: row.id, japanese: row.japanese, english: row.english, tags: row.tags});}}>
                             <TableCell component='th' scope='row'>
                                 {row.japanese}
                             </TableCell>
@@ -133,22 +137,30 @@ const Phrases: React.FC = () => {
                             </TableCell>
                             <TableCell component='th' scope='row'>
                             {row.tags !== undefined ? (
-                                row.tags.map((tag) => (
-                                <div key={tag.id}>{tag.name}</div>
-                                ))
+                                <div>
+                                {row.tags.map((tag) => (
+                                    <Chip
+                                    key={tag.id}
+                                    label={tag.name}
+                                    style={{ marginRight: '8px', marginBottom: '4px' }}
+                                    />
+                                ))}
+                                </div>
                             ) : (
                                 <div></div>
                             )}
                             </TableCell>
 
 
-                            <TableCell>
+
+                            {/* <TableCell>
                                 <Button className={classes.button} variant='contained' onClick={() => handleDeletePhrase(row.id)}>
                                     <DeleteIcon />
                                 </Button>
-                            </TableCell>
+                            </TableCell> */}
                         </TableRow>
                     ))}
+                    <UpdateModal updateModalIsOpen={updateModalIsOpen} setUpdateModalIsOpen={setUpdateModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} phrase={selectedPhrase}/>
                 </TableBody>
             </Table>
         </TableContainer>

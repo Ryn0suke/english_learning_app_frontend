@@ -11,6 +11,8 @@ import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -20,13 +22,18 @@ const useStyles = makeStyles((theme: Theme) => ({
         gap: theme.spacing(1),
         marginTop: theme.spacing(2),
         margin: theme.spacing(2),
-      },
-      tag: {
+    },
+    tag: {
+        display: 'flex',
+        alignItems: 'center',
         padding: theme.spacing(0.5, 1),
         backgroundColor: theme.palette.grey[300],
         borderRadius: theme.shape.borderRadius,
-      },
-  }));
+    },
+    deleteTagButton: {
+        marginLeft: theme.spacing(1),
+    },
+}));
 
 interface recieveProps {
     recieveAllPhrases: (page: number) => Promise<void>
@@ -63,7 +70,12 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) =>
         }
     };
 
-    const handleCrateNewPhrase = async(e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleDeleteTag = (index: number) => {
+        const updatedTags = tags.filter((_, i) => i !== index);
+        setTags(updatedTags);
+    };
+
+    const handleCreateNewPhrase = async(e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         if (currentUser?.id === undefined) {
@@ -90,10 +102,7 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) =>
                 setAlertMessage(err.message);
                 setAlertMessageOpen(true);
             }
-
         }
-
-        return;
     };
 
     return (
@@ -138,7 +147,16 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) =>
                         </Button>
                         <Box className={classes.tagBox}>
                             {tags.map((tag, index) => (
-                                <span key={index} className={classes.tag}>{tag.name}</span>
+                                <div key={index} className={classes.tag}>
+                                    {tag.name}
+                                    <IconButton
+                                        size='small'
+                                        className={classes.deleteTagButton}
+                                        onClick={() => handleDeleteTag(index)}
+                                    >
+                                        <DeleteIcon fontSize='small' />
+                                    </IconButton>
+                                </div>
                             ))}
                         </Box>
                         <Button
@@ -147,8 +165,8 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) =>
                             size='large'
                             fullWidth
                             color='default'
-                            disabled={!japanese || !english}
-                            onClick={handleCrateNewPhrase}
+                            disabled={!japanese || !english || !tags[0]}
+                            onClick={handleCreateNewPhrase}
                         >
                             Submit
                         </Button>
@@ -167,3 +185,57 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) =>
 };
 
 export default Register;
+
+
+
+// Register.tsx
+// import React, { useState, useContext } from 'react';
+// import PhraseForm from './commonPart';
+// import { AuthContext } from 'App';
+// import { Phrase } from 'interfaces';
+// import { createNewPhrases } from 'lib/api/cradPhrases';
+// import AlertMessage from 'components/utils/AlertMessage';
+
+// interface recieveProps {
+//   recieveAllPhrases: (page: number) => Promise<void>;
+//   currentPage: number;
+// }
+
+// const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) => {
+//   const { currentUser } = useContext(AuthContext);
+//   const [alertMessageOpen, setAlertMessageOpen] = useState<boolean>(false);
+//   const [alertMessage, setAlertMessage] = useState<string>('');
+
+//   const handleCreateNewPhrase = async (id: number, newPhrase: Phrase) => {
+//     try {
+//       const res = await createNewPhrases(id, newPhrase);
+//       console.log(res);
+//       await recieveAllPhrases(currentPage);
+//     } catch (err: unknown) {
+//       if (err instanceof Error) {
+//         setAlertMessage(err.message);
+//         setAlertMessageOpen(true);
+//       }
+//     }
+//   };
+
+//   return (
+//     <>
+//       <PhraseForm
+//         initialJapanese=''
+//         initialEnglish=''
+//         initialTags={[]}
+//         onSubmit={handleCreateNewPhrase}
+//         submitLabel='登録'
+//       />
+//       <AlertMessage
+//         open={alertMessageOpen}
+//         setOpen={setAlertMessageOpen}
+//         severity='error'
+//         message={alertMessage}
+//       />
+//     </>
+//   );
+// };
+
+// export default Register;

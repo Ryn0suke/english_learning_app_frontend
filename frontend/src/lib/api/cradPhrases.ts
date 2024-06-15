@@ -25,8 +25,9 @@ export const createNewPhrases = (phrase:Phrase) => {
     });
 };
 
-export const updatePhrases = (phrase:Phrase) => {
-    return client.post(`phrases/${phrase.id}`, phrase, {
+export const updatePhrases = (id:number, phrase:Phrase) => {
+    console.log(phrase);
+    return client.patch(`phrases/${id}`, phrase, {
         headers: {
             'access-token': Cookies.get('_access_token'),
             'client': Cookies.get('_client'),
