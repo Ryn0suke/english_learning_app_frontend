@@ -88,6 +88,7 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
             const newTagObj: Tag = { name: newTag };
             setTags([...tags, newTagObj]);
             setNewTag('');
+            console.log(newTag);
         }
     };
 
@@ -164,6 +165,7 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
                                 variant='outlined'
                                 fullWidth
                                 label='新しいタグ'
+                                value={newTag}
                                 margin='dense'
                                 onChange={handleSetNewTag}
                             />
