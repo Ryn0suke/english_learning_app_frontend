@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 //import { useNavigate } from 'react-router-dom';
 import { AuthContext } from 'App';
 import { viewAllPhrases, createNewPhrases, updatePhrases, destoyPhrases } from 'lib/api/cradPhrases';
-import { Phrase } from 'interfaces';
+import { Phrase, SearchOptions, Tag } from 'interfaces';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -55,14 +55,16 @@ const Phrases: React.FC = () => {
     const [registerModalIsOpen, setRegisterModalIsOpen] = useState<boolean>(false);
     const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false);
     const [selectedPhrase, setSelectedPhrase] = useState<Phrase>({id: -1, japanese: '', english: '', tags:[]});
+    const [searchOptions, setSearchOptions] = useState<SearchOptions>({japanese: '', english: '', tags: [{name: ""}]});
 
-    const recieveAllPhrases = async (page:number) => {
+    const recieveAllPhrases = async (page: number, searchOptions: SearchOptions) => {
         try {
             if (currentUser?.id === undefined) {
                 console.log('User ID is undefined');
                 return;
             }
-            const res = await viewAllPhrases(currentUser.id, page);
+            console.log('Search Options:', searchOptions); 
+            const res = await viewAllPhrases(currentUser.id, page, searchOptions);
             console.log(res.data)
             setPhrases(res.data.phrases);
             setTotalPage(res.data.total_pages);
@@ -73,19 +75,19 @@ const Phrases: React.FC = () => {
         }
     };
 
-    const handleDeletePhrase = async (id:number) => {
-        try {
-            if (currentUser?.id === undefined) {
-                console.log('User ID is undefined');
-                return;
-            }
-            const res = await destoyPhrases(id);
-            console.log(res);
-            await recieveAllPhrases(currentPage);
-        } catch (err) {
-            console.log(err);
-        }
-    };
+    // const handleDeletePhrase = async (id:number) => {
+    //     try {
+    //         if (currentUser?.id === undefined) {
+    //             console.log('User ID is undefined');
+    //             return;
+    //         }
+    //         const res = await destoyPhrases(id);
+    //         console.log(res);
+    //         await recieveAllPhrases(currentPage);
+    //     } catch (err) {
+    //         console.log(err);
+    //     }
+    // };
 
     const changeCurrentPage = (page:number) => {
         setCurrentPage(page);
@@ -93,8 +95,8 @@ const Phrases: React.FC = () => {
  
 
     useEffect(() => {
-        recieveAllPhrases(currentPage);
-    }, [currentUser, currentPage]);
+        recieveAllPhrases(currentPage, searchOptions);
+    }, [currentUser, currentPage, searchOptions]);
 
     
     const classes = useStyles();
@@ -113,8 +115,9 @@ const Phrases: React.FC = () => {
     return (
         <>
         <Button className={classes.button} onClick={() => setRegisterModalIsOpen(true)}>登録・検索</Button>
+        <Button className={classes.button} onClick={() => setSearchOptions({japanese: '', english: '', tags: [{name: ''}]})}>検索解除</Button>
 
-        <RegisterAndSearchModal registerModalIsOpen={registerModalIsOpen} setRegisterModalIsOpen={setRegisterModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage}/>
+        <RegisterAndSearchModal registerModalIsOpen={registerModalIsOpen} setRegisterModalIsOpen={setRegisterModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} searchOptions={searchOptions} setSearchOptions={setSearchOptions}/>
 
         <TableContainer component={Paper}>
             <Table className={classes.table} aria-label='phrase table'>
@@ -160,7 +163,7 @@ const Phrases: React.FC = () => {
                             </TableCell> */}
                         </TableRow>
                     ))}
-                    <UpdateModal updateModalIsOpen={updateModalIsOpen} setUpdateModalIsOpen={setUpdateModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} phrase={selectedPhrase}/>
+                    <UpdateModal updateModalIsOpen={updateModalIsOpen} setUpdateModalIsOpen={setUpdateModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} phrase={selectedPhrase} searchOptions={searchOptions}/>
                 </TableBody>
             </Table>
         </TableContainer>

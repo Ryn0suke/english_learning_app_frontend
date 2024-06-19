@@ -34,3 +34,9 @@ export interface Phrase {
     english: string
     tags: Tag[]
 };
+
+export interface SearchOptions {
+    japanese: string
+    english: string
+    tags: Tag[]
+};

@@ -4,8 +4,7 @@ import Button from '@material-ui/core/Button';
 import Register from './Register';
 import Search from './Search';
 import { AuthContext } from 'App';
-import { Phrase } from 'interfaces';
-import { Tag } from 'interfaces';
+import { Phrase, Tag, SearchOptions } from 'interfaces';
 
 import { viewAllPhrases, createNewPhrases, updatePhrases, destoyPhrases } from 'lib/api/cradPhrases';
 
@@ -23,9 +22,11 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 interface ModalProps {
     updateModalIsOpen: boolean
     setUpdateModalIsOpen: (isOpen: boolean) => void
-    recieveAllPhrases: (page: number) => Promise<void>
+    recieveAllPhrases: (page: number, searchOptions: SearchOptions) => Promise<void>
     currentPage: number
     phrase: Phrase
+    searchOptions: SearchOptions
+    // setSearchOptions: (options: SearchOptions) => void
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -48,7 +49,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
-const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsOpen, recieveAllPhrases, currentPage, phrase }) => {
+const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsOpen, recieveAllPhrases, currentPage, phrase, searchOptions }) => {
     const { currentUser } = useContext(AuthContext);
     const [japanese, setJapanese] = useState<string>('');
     const [english, setEnglish] = useState<string>('');
@@ -72,7 +73,7 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
             }
             const res = await destoyPhrases(id);
             console.log(res);
-            await recieveAllPhrases(currentPage);
+            await recieveAllPhrases(currentPage, searchOptions);
             setUpdateModalIsOpen(false);
         } catch (err) {
             console.log(err);
@@ -115,7 +116,7 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
         try {
             const res = await updatePhrases(phraseID, newPhrase);
             console.log(res);
-            await recieveAllPhrases(currentPage);
+            await recieveAllPhrases(currentPage, searchOptions);
             setJapanese('');
             setEnglish('');
             setTags([]);

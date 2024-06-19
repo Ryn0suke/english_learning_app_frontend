@@ -1,11 +1,13 @@
 import client from 'lib/api/client';
 import Cookies from 'js-cookie';
-import { Phrase } from 'interfaces';
+import { Phrase, SearchOptions } from 'interfaces';
 
-export const viewAllPhrases = (id:number, page:number) => {
+export const viewAllPhrases = (id: number, page: number, searchOptions: SearchOptions = { japanese: '', english: '', tags: [] }) => {
+    console.log(searchOptions);
     return client.get(`phrases/${id}`, {
         params: {
             page: page,
+            search: searchOptions
         },
         headers: {
             'access-token': Cookies.get('_access_token'),
@@ -14,6 +16,7 @@ export const viewAllPhrases = (id:number, page:number) => {
         }
     });
 };
+
 
 export const createNewPhrases = (phrase:Phrase) => {
     return client.post(`phrases`, phrase, {

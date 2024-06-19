@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from 'App';
-import { Phrase } from 'interfaces';
+import { Phrase, SearchOptions } from 'interfaces';
 import { createNewPhrases } from 'lib/api/cradPhrases';
 import AlertMessage from 'components/utils/AlertMessage';
 import { Tag } from 'interfaces';
@@ -36,11 +36,12 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 
 interface recieveProps {
-    recieveAllPhrases: (page: number) => Promise<void>
+    recieveAllPhrases: (page: number, options: SearchOptions) => Promise<void>
     currentPage: number
+    searchOptions: SearchOptions
 };
 
-const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) => {
+const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, searchOptions }) => {
     const { currentUser } = useContext(AuthContext);
     const [japanese, setJapanese] = useState<string>('');
     const [english, setEnglish] = useState<string>('');
@@ -93,7 +94,7 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage }) =>
         try {
             const res = await createNewPhrases(newPhrase);
             console.log(res);
-            await recieveAllPhrases(currentPage);
+            await recieveAllPhrases(currentPage, searchOptions);
             setJapanese('');
             setEnglish('');
             setTags([]);
