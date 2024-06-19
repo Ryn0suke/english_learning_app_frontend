@@ -35,13 +35,13 @@ const useStyles = makeStyles({
         color: 'white'
     },
     modal: {
-        top: "20%",
-        left: "50%",
-        right: "auto",
-        bottom: "auto",
-        marginRight: "-50%",
-        transform: "translate(-50%, -50%)",
-        minWidth: "40%",
+        top: '20%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)',
+        minWidth: '40%',
     }
   });
 
@@ -55,7 +55,7 @@ const Phrases: React.FC = () => {
     const [registerModalIsOpen, setRegisterModalIsOpen] = useState<boolean>(false);
     const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false);
     const [selectedPhrase, setSelectedPhrase] = useState<Phrase>({id: -1, japanese: '', english: '', tags:[]});
-    const [searchOptions, setSearchOptions] = useState<SearchOptions>({japanese: '', english: '', tags: [{name: ""}]});
+    const [searchOptions, setSearchOptions] = useState<SearchOptions>({japanese: '', english: '', tags: [{name: ''}]});
 
     const recieveAllPhrases = async (page: number, searchOptions: SearchOptions) => {
         try {

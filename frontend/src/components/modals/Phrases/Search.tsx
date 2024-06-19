@@ -16,7 +16,7 @@ interface recieveProps {
 };
 
 const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsOpen, searchOptions, setSearchOptions }) => {
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([{name: ''}]);
   const [Tags, setTags] = useState<Tag[]>([]);
   const { currentUser } = useContext(AuthContext);
   const [japanese, setJapanese] = useState<string>('');
