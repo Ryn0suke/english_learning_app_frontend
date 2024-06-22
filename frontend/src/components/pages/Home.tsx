@@ -12,6 +12,7 @@ const Home: React.FC = () => {
             <h1>サインインに成功しました</h1>
             <h2>Email: {currentUser?.email}</h2>
             <h2>Name: {currentUser?.name}</h2>
+            <h2>ID: {currentUser?.id}</h2>
           </>
         ) : (
           <h1>サインインしていません</h1>

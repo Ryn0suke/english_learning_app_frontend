@@ -2,7 +2,7 @@ import client from 'lib/api/client';
 import Cookies from 'js-cookie';
 import { Phrase, SearchOptions } from 'interfaces';
 
-export const viewAllPhrases = (id: number, page: number, searchOptions: SearchOptions = { japanese: '', english: '', tags: [] }) => {
+export const viewAllPhrases = (id: number, page: number, searchOptions: SearchOptions = { japanese: '', english: '', tags: [], isPartialMatch: true }) => {
     console.log(searchOptions);
     return client.get(`phrases/${id}`, {
         params: {
@@ -29,7 +29,6 @@ export const createNewPhrases = (phrase:Phrase) => {
 };
 
 export const updatePhrases = (id:number, phrase:Phrase) => {
-    console.log(phrase);
     return client.patch(`phrases/${id}`, phrase, {
         headers: {
             'access-token': Cookies.get('_access_token'),

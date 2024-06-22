@@ -18,6 +18,9 @@ import CardHeader from '@material-ui/core/CardHeader';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import { GreenCheckBox, YellowCheckBox, RedCheckBox } from './CheckState';
+import { GradeRounded } from '@material-ui/icons';
+
 
 interface ModalProps {
     updateModalIsOpen: boolean
@@ -26,7 +29,6 @@ interface ModalProps {
     currentPage: number
     phrase: Phrase
     searchOptions: SearchOptions
-    // setSearchOptions: (options: SearchOptions) => void
 };
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -49,6 +51,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
 }));
 
+const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+
 const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsOpen, recieveAllPhrases, currentPage, phrase, searchOptions }) => {
     const { currentUser } = useContext(AuthContext);
     const [japanese, setJapanese] = useState<string>('');
@@ -58,11 +62,17 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
     const [alertMessageOpen, setAlertMessageOpen] = useState<boolean>(false);
     const [alertMessage, setAlertMessage] = useState<string>('');
     const classes = useStyles();
+    const [changeState1, setChangeState1] = useState<boolean>(false);
+    const [changeState2, setChangeState2] = useState<boolean>(false);
+    const [changeState3, setChangeState3] = useState<boolean>(false);
 
     useEffect(() => {
         setJapanese(phrase.japanese);
         setEnglish(phrase.english);
         setTags(phrase.tags);
+        setChangeState1(phrase.state1);
+        setChangeState2(phrase.state2);
+        setChangeState3(phrase.state3);
     }, [phrase]);
 
     const handleDeletePhrase = async (id: number) => {
@@ -110,6 +120,9 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
             id: currentUser.id,
             japanese: japanese,
             english: english,
+            state1: changeState1,
+            state2: changeState2,
+            state3: changeState3,
             tags: tags // タグを追加
         };
 
@@ -162,6 +175,17 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
                                 margin='dense'
                                 onChange={(e) => setEnglish(e.target.value)}
                             />
+
+                            <GreenCheckBox state={changeState1} isLock={false} toggleState={() => {
+                                setChangeState1(prev => !prev)
+                            }}/>
+                            <YellowCheckBox state={changeState2} isLock={false} toggleState={() => {
+                                setChangeState2(prev => !prev)
+                            }}/>            
+                            <RedCheckBox state={changeState3} isLock={false} toggleState={() => {
+                                setChangeState3(prev => !prev)
+                            }}/>
+
                             <TextField
                                 variant='outlined'
                                 fullWidth

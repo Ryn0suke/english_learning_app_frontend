@@ -19,6 +19,7 @@ import Chip from '@material-ui/core/Chip'
 import Modal from 'react-modal';
 import RegisterAndSearchModal from 'components/modals/Phrases/RegisterAndSearchModal';
 import UpdateModal from 'components/modals/Phrases/UpdateModal';
+import CheckState from 'components/modals/Phrases/CheckState';
 
 
 
@@ -54,8 +55,8 @@ const Phrases: React.FC = () => {
     const pageNumbers: number[] = [...new Array(totalPage).keys()].map(number => ++number).slice(Math.max(0, currentPage - 6), Math.min(totalPage, currentPage + 4));
     const [registerModalIsOpen, setRegisterModalIsOpen] = useState<boolean>(false);
     const [updateModalIsOpen, setUpdateModalIsOpen] = useState<boolean>(false);
-    const [selectedPhrase, setSelectedPhrase] = useState<Phrase>({id: -1, japanese: '', english: '', tags:[]});
-    const [searchOptions, setSearchOptions] = useState<SearchOptions>({japanese: '', english: '', tags: [{name: ''}]});
+    const [selectedPhrase, setSelectedPhrase] = useState<Phrase>({id: -1, japanese: '', english: '', state1: false, state2: false, state3: false, tags:[]});
+    const [searchOptions, setSearchOptions] = useState<SearchOptions>({japanese: '', english: '', tags: [{name: ''}], isPartialMatch: true});
 
     const recieveAllPhrases = async (page: number, searchOptions: SearchOptions) => {
         try {
@@ -115,7 +116,7 @@ const Phrases: React.FC = () => {
     return (
         <>
         <Button className={classes.button} onClick={() => setRegisterModalIsOpen(true)}>登録・検索</Button>
-        <Button className={classes.button} onClick={() => setSearchOptions({japanese: '', english: '', tags: [{name: ''}]})}>検索解除</Button>
+        <Button className={classes.button} onClick={() => setSearchOptions({japanese: '', english: '', tags: [{name: ''}], isPartialMatch: true})}>検索解除</Button>
 
         <RegisterAndSearchModal registerModalIsOpen={registerModalIsOpen} setRegisterModalIsOpen={setRegisterModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} searchOptions={searchOptions} setSearchOptions={setSearchOptions}/>
 
@@ -125,18 +126,22 @@ const Phrases: React.FC = () => {
                     <TableRow>
                         <TableCell>日本語</TableCell>
                         <TableCell>英語</TableCell>
+                        <TableCell>チェック状態</TableCell>
                         <TableCell>タグ</TableCell>
                         {/* <TableCell>削除</TableCell> */}
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     {phrases?.map((row) => (
-                        <TableRow key={row.id} onClick={() => {setUpdateModalIsOpen(true); setSelectedPhrase({id: row.id, japanese: row.japanese, english: row.english, tags: row.tags});}}>
+                        <TableRow key={row.id} onClick={() => {setUpdateModalIsOpen(true); setSelectedPhrase({id: row.id, japanese: row.japanese, english: row.english, state1: row.state1, state2: row.state2, state3: row.state3, tags: row.tags});}}>
                             <TableCell component='th' scope='row'>
                                 {row.japanese}
                             </TableCell>
                             <TableCell component='th' scope='row'>
                                 {row.english}
+                            </TableCell>
+                            <TableCell>
+                                <CheckState state1={row.state1} state2={row.state2} state3={row.state3} isLock={true}/>
                             </TableCell>
                             <TableCell component='th' scope='row'>
                             {row.tags !== undefined ? (

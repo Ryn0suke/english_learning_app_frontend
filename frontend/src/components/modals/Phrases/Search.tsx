@@ -2,11 +2,10 @@ import React, { useState, useContext, useEffect } from 'react';
 import { viewAllTags } from 'lib/api/cradTags';
 import { AuthContext } from 'App';
 import { Tag, SearchOptions } from 'interfaces';
-import { TextField, MenuItem, FormControl, InputLabel, Select, Checkbox, ListItemText, OutlinedInput, Button, RadioGroup } from '@material-ui/core';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Radio from '@material-ui/core/Radio';
+import { TextField, MenuItem, FormControl, InputLabel, Select, Checkbox, ListItemText, OutlinedInput, Button, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import AlertMessage from 'components/utils/AlertMessage';
-
+import { GreenCheckBox, YellowCheckBox, RedCheckBox } from './CheckState';
+import { Box } from '@material-ui/core';
 
 interface recieveProps {
   recieveAllPhrases: (page: number, options: SearchOptions) => Promise<void>
@@ -17,14 +16,16 @@ interface recieveProps {
 
 const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsOpen, searchOptions, setSearchOptions }) => {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([{name: ''}]);
-  const [Tags, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const { currentUser } = useContext(AuthContext);
   const [japanese, setJapanese] = useState<string>('');
   const [english, setEnglish] = useState<string>('');
+  const [isPartialMatch, setIsPartialMatch] = useState<string>('part');
   const [alertMessageOpen, setAlertMessageOpen] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState<string>('');
-
-  const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+  const [changeState1, setChangeState1] = useState<boolean>(false);
+  const [changeState2, setChangeState2] = useState<boolean>(false);
+  const [changeState3, setChangeState3] = useState<boolean>(false);
 
   const recieveAllTags = async () => {
     try {
@@ -45,7 +46,7 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
       target: { value },
     } = event;
     const selectedTagNames = typeof value === 'string' ? value.split(',') : (value as string[]);
-    const newSelectedTags = Tags.filter(tag => selectedTagNames.includes(tag.name));
+    const newSelectedTags = tags.filter(tag => selectedTagNames.includes(tag.name));
     setSelectedTags(newSelectedTags);
   };
 
@@ -61,7 +62,11 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
         ...searchOptions,
         japanese: japanese,
         english: english,
-        tags: selectedTags
+        tags: selectedTags,
+        isPartialMatch: isPartialMatch === 'part',
+        state1: changeState1,
+        state2: changeState2,
+        state3: changeState3,
       };
       console.log(updatedSearchOptions);
       setSearchOptions(updatedSearchOptions);
@@ -78,8 +83,6 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
     }
   };
 
-  // console.log(Tags);
-
   return (
     <>
       <h1>検索オプション</h1>
@@ -95,7 +98,7 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
             input={<OutlinedInput label="Tags" />}
             renderValue={(selected) => (selected as string[]).join(', ')}
           >
-            {Tags.map((tag) => (
+            {tags.map((tag) => (
               <MenuItem key={tag.id} value={tag.name}>
                 <Checkbox checked={selectedTags.some(selectedTag => selectedTag.name === tag.name)} />
                 <ListItemText primary={tag.name} />
@@ -123,7 +126,16 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
             onChange={(e) => {setEnglish(e.target.value)}}
           />
 
-          <RadioGroup>
+          <div style={ {display: 'flex'} }>
+            <GreenCheckBox state={changeState1} isLock={false} toggleState={() => {
+                                  setChangeState1(prev => !prev)}}/>
+            <YellowCheckBox state={changeState2} isLock={false} toggleState={() => {
+                                  setChangeState2(prev => !prev)}}/>
+            <RedCheckBox state={changeState3} isLock={false} toggleState={() => {
+                                  setChangeState3(prev => !prev)}}/>
+          </div>
+
+          <RadioGroup value={isPartialMatch} onChange={(e) => setIsPartialMatch(e.target.value)}>
             <FormControlLabel value="part" control={<Radio />} label="部分一致" />
             <FormControlLabel value="exact" control={<Radio />} label="完全一致" />
           </RadioGroup>
@@ -144,3 +156,4 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
 };
 
 export default Search;
+

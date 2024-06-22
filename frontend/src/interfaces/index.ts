@@ -32,6 +32,9 @@ export interface Phrase {
     id: number
     japanese: string
     english: string
+    state1: boolean
+    state2: boolean
+    state3: boolean
     tags: Tag[]
 };
 
@@ -39,4 +42,8 @@ export interface SearchOptions {
     japanese: string
     english: string
     tags: Tag[]
+    isPartialMatch: boolean
+    state1?: boolean
+    state2?: boolean
+    state3?: boolean
 };
