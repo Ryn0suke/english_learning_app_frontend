@@ -1,9 +1,8 @@
 import client from 'lib/api/client';
 import Cookies from 'js-cookie';
-import { Phrase, SearchOptions } from 'interfaces';
+import { Phrase, SearchOptions, QuestionOptions } from 'interfaces';
 
 export const viewAllPhrases = (id: number, page: number, searchOptions: SearchOptions = { japanese: '', english: '', tags: [], isPartialMatch: true }) => {
-    console.log(searchOptions);
     return client.get(`phrases/${id}`, {
         params: {
             page: page,
@@ -40,6 +39,19 @@ export const updatePhrases = (id:number, phrase:Phrase) => {
 
 export const destoyPhrases = (id:number) => {
     return client.delete(`phrases/${id}`, {
+        headers: {
+            'access-token': Cookies.get('_access_token'),
+            'client': Cookies.get('_client'),
+            'uid': Cookies.get('_uid')
+        }
+    });
+};
+
+export const searchQuestion = (id: number, questionOptions: QuestionOptions) => {
+    return client.get(`questions/${id}`, {
+        params: {
+            option: questionOptions
+        },
         headers: {
             'access-token': Cookies.get('_access_token'),
             'client': Cookies.get('_client'),

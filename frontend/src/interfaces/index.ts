@@ -47,3 +47,13 @@ export interface SearchOptions {
     state2?: boolean
     state3?: boolean
 };
+
+export interface QuestionOptions {
+    tags: Tag[]
+    state1?: boolean
+    state2?: boolean
+    state3?: boolean
+    numOfQuestions: number
+    page: number
+    isJapaneseToEnglish: boolean
+};

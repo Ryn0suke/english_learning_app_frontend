@@ -16,7 +16,7 @@ interface recieveProps {
 
 const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsOpen, searchOptions, setSearchOptions }) => {
   const [selectedTags, setSelectedTags] = useState<Tag[]>([{name: ''}]);
-  const [tags, setTags] = useState<Tag[]>([]);
+  const [tags, setTags] = useState<Tag[]>([{name: ''}]);
   const { currentUser } = useContext(AuthContext);
   const [japanese, setJapanese] = useState<string>('');
   const [english, setEnglish] = useState<string>('');
@@ -73,7 +73,7 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
       await recieveAllPhrases(1, updatedSearchOptions);
       setJapanese('');
       setEnglish('');
-      setSelectedTags([]);
+      setSelectedTags([{name: ''}]);
       setRegisterModalIsOpen(false);
     } catch(err: unknown) {
       if(err instanceof Error) {
