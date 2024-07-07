@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import { green, yellow, red } from '@material-ui/core/colors';
+import { green, yellow, red, grey } from '@material-ui/core/colors';
 
 interface RecieveProps {
     state1: boolean;
@@ -44,6 +44,16 @@ export const RedCheckBox = ({ state, toggleState ,isLock }: { state: boolean, to
         onChange={toggleState}
         icon={<CheckBoxOutlineBlankIcon style={{ color: red[500] }} />}
         checkedIcon={<CheckBoxIcon style={{ color: red[500] }} />}
+        disabled={isLock}
+    />
+);
+
+export const GreyCheckBox = ({ state, toggleState ,isLock }: { state: boolean, toggleState?: () => void, isLock: boolean }) => (
+    <Checkbox
+        checked={state}
+        onChange={toggleState}
+        icon={<CheckBoxOutlineBlankIcon style={{ color: grey[500] }} />}
+        checkedIcon={<CheckBoxIcon style={{ color: grey[500] }} />}
         disabled={isLock}
     />
 );

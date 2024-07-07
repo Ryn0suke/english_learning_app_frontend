@@ -46,6 +46,7 @@ export interface SearchOptions {
     state1?: boolean
     state2?: boolean
     state3?: boolean
+    state4?: boolean
 };
 
 export interface QuestionOptions {

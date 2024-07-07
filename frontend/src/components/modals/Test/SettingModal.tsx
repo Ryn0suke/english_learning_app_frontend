@@ -12,25 +12,49 @@ import { searchQuestion } from 'lib/api/cradPhrases';
 
 
 interface ModalProps {
-    modalIsOpen: boolean
-    setModalIsOpen: (isOpen: boolean) => void
-    numOfQuestions: number
-    setNumOfQuestions: (qNum: number) => void
-    setPhrases: (phrases: Phrase[]) => void
-    isJapaneseToEnglish: string
-    setIsJapaneseToEnglish: (japaneseToEnglish: string) => void
-    currentPage: number
-    setCurrentQuestion: (currentQuestion: number) => void
+  modalIsOpen: boolean
+  setModalIsOpen: (isOpen: boolean) => void
+  numOfQuestions: number
+  setNumOfQuestions: (qNum: number) => void
+  setPhrases: (phrases: Phrase[]) => void
+  isJapaneseToEnglish: string
+  setIsJapaneseToEnglish: (japaneseToEnglish: string) => void
+  currentPage: number
+  setCurrentQuestion: (currentQuestion: number) => void
+  selectedTags: Tag[]
+  setSelectedTags: (tags: Tag[]) => void
+  changeState1: boolean
+  setChangeState1: React.Dispatch<React.SetStateAction<boolean>>
+  changeState2: boolean
+  setChangeState2: React.Dispatch<React.SetStateAction<boolean>>
+  changeState3: boolean
+  setChangeState3: React.Dispatch<React.SetStateAction<boolean>>
+  tags: Tag[]
+  setTags: (tags: Tag[]) => void
+  questionOptions: QuestionOptions
+  setQuestionOptions: (options: QuestionOptions) => void
+  handleSubmit: (event: React.FormEvent<HTMLFormElement>, isSettingModal: boolean) => void;
 };
 
-const SettingModal: React.FC<ModalProps> = ({ modalIsOpen, setModalIsOpen, numOfQuestions, setNumOfQuestions, setPhrases, isJapaneseToEnglish, setIsJapaneseToEnglish, currentPage, setCurrentQuestion }) => {
-    const [selectedTags, setSelectedTags] = useState<Tag[]>([{name: ''}]);
-    const [changeState1, setChangeState1] = useState<boolean>(false);
-    const [changeState2, setChangeState2] = useState<boolean>(false);
-    const [changeState3, setChangeState3] = useState<boolean>(false);
-    const [tags, setTags] = useState<Tag[]>([{name: ''}]);
+const SettingModal: React.FC<ModalProps> = ({ modalIsOpen, setModalIsOpen, 
+                                              numOfQuestions, setNumOfQuestions, 
+                                              setPhrases, 
+                                              isJapaneseToEnglish, setIsJapaneseToEnglish, 
+                                              currentPage, 
+                                              setCurrentQuestion,
+                                              selectedTags, setSelectedTags,
+                                              changeState1, setChangeState1, changeState2, setChangeState2, changeState3, setChangeState3,
+                                              tags, setTags,
+                                              questionOptions, setQuestionOptions,
+                                              handleSubmit
+                                             }) => {
+    // const [selectedTags, setSelectedTags] = useState<Tag[]>([{name: ''}]);
+    // const [changeState1, setChangeState1] = useState<boolean>(false);
+    // const [changeState2, setChangeState2] = useState<boolean>(false);
+    // const [changeState3, setChangeState3] = useState<boolean>(false);
+    // const [tags, setTags] = useState<Tag[]>([{name: ''}]);
     const { currentUser } = useContext(AuthContext);
-    const [questionOptions, setQuestionOptions] = useState<QuestionOptions>({tags:[{name: ''}], numOfQuestions: 0, page: 1, isJapaneseToEnglish: true});
+    // const [questionOptions, setQuestionOptions] = useState<QuestionOptions>({tags:[{name: ''}], numOfQuestions: 0, page: 1, isJapaneseToEnglish: true});
 
     const recieveAllTags = async () => {
         try {
@@ -55,41 +79,41 @@ const SettingModal: React.FC<ModalProps> = ({ modalIsOpen, setModalIsOpen, numOf
         setSelectedTags(newSelectedTags);
       };
 
-      const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        console.log(selectedTags);
-        event.preventDefault();
-        try {
-          const newQuestionOptions: QuestionOptions = {
-            tags: selectedTags,
-            state1: changeState1,
-            state2: changeState2,
-            state3: changeState3,
-            numOfQuestions: numOfQuestions,
-            page: currentPage,
-            isJapaneseToEnglish: isJapaneseToEnglish === 'japaneseToEnglish' ? true : false
-          };
+      // const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+      //   console.log(selectedTags);
+      //   event.preventDefault();
+      //   try {
+      //     const newQuestionOptions: QuestionOptions = {
+      //       tags: selectedTags,
+      //       state1: changeState1,
+      //       state2: changeState2,
+      //       state3: changeState3,
+      //       numOfQuestions: numOfQuestions,
+      //       page: currentPage,
+      //       isJapaneseToEnglish: isJapaneseToEnglish === 'japaneseToEnglish' ? true : false
+      //     };
       
-          if (currentUser?.id === undefined) {
-            console.log('User ID is undefined');
-            return;
-          };
+      //     if (currentUser?.id === undefined) {
+      //       console.log('User ID is undefined');
+      //       return;
+      //     };
       
-          console.log(newQuestionOptions);
-          const res = await searchQuestion(currentUser.id, newQuestionOptions);
-          console.log(res);
-          setPhrases(res.data.phrases);
-          setNumOfQuestions(res.data.phrases.length);
-          setSelectedTags([{name: ''}]);
-          setChangeState1(false);
-          setChangeState2(false);
-          setChangeState3(false);
-          setQuestionOptions({tags:[{name: ''}], numOfQuestions: 0, page: 1, isJapaneseToEnglish: true});
-          setCurrentQuestion(0);
-          setModalIsOpen(false);
-        } catch (err) {
-          console.log(err);
-        }
-      };
+      //     console.log(newQuestionOptions);
+      //     const res = await searchQuestion(currentUser.id, newQuestionOptions);
+      //     console.log(res);
+      //     setPhrases(res.data.phrases);
+      //     setNumOfQuestions(res.data.phrases.length);
+      //     // setSelectedTags([{name: ''}]);
+      //     // setChangeState1(false);
+      //     // setChangeState2(false);
+      //     // setChangeState3(false);
+      //     // setQuestionOptions({tags:[{name: ''}], numOfQuestions: 0, page: 1, isJapaneseToEnglish: true});
+      //     setCurrentQuestion(0);
+      //     setModalIsOpen(false);
+      //   } catch (err) {
+      //     console.log(err);
+      //   }
+      // };
       
 
       useEffect(() => {
@@ -105,7 +129,7 @@ const SettingModal: React.FC<ModalProps> = ({ modalIsOpen, setModalIsOpen, numOf
 
             <h1>出題オプション</h1>
             
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={(e) => handleSubmit(e, true)}>
                 <FormControl fullWidth>
                 <InputLabel id="selectbox-label">Tags</InputLabel>
                 <Select
@@ -115,7 +139,7 @@ const SettingModal: React.FC<ModalProps> = ({ modalIsOpen, setModalIsOpen, numOf
                     value={selectedTags.map(tag => tag.name)}
                     onChange={handleChange}
                     input={<OutlinedInput label="Tags" />}
-                    renderValue={(selected) => (selected as string[]).join(', ')}
+                    renderValue={(selected) => (selected as Tag[]).join(', ')}
                 >
                     {tags.map((tag) => (
                     <MenuItem key={tag.id} value={tag.name}>
@@ -128,12 +152,9 @@ const SettingModal: React.FC<ModalProps> = ({ modalIsOpen, setModalIsOpen, numOf
 
                 <div style={ {display: 'flex'} }>
                     <h3>チェック状態</h3>
-                    <GreenCheckBox state={changeState1} isLock={false} toggleState={() => {
-                                        setChangeState1(prev => !prev)}}/>
-                    <YellowCheckBox state={changeState2} isLock={false} toggleState={() => {
-                                        setChangeState2(prev => !prev)}}/>
-                    <RedCheckBox state={changeState3} isLock={false} toggleState={() => {
-                                        setChangeState3(prev => !prev)}}/>
+                        <GreenCheckBox state={changeState1} isLock={false} toggleState={() => setChangeState1(prev => !prev)} />
+                        <YellowCheckBox state={changeState2} isLock={false} toggleState={() => setChangeState2(prev => !prev)} />
+                        <RedCheckBox state={changeState3} isLock={false} toggleState={() => setChangeState3(prev => !prev)} />
                 </div>
 
                 <h3>問題数</h3>

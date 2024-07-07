@@ -1,26 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Modal from 'react-modal';
 import Button from '@material-ui/core/Button';
-import Register from './Register';
-import Search from './Search';
 import { AuthContext } from 'App';
 import { Phrase, Tag, SearchOptions } from 'interfaces';
 
-import { viewAllPhrases, createNewPhrases, updatePhrases, destoyPhrases } from 'lib/api/cradPhrases';
+import { viewAllPhrases, updatePhrases, destoyPhrases } from 'lib/api/cradPhrases';
 
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
 
 import TextField from '@material-ui/core/TextField';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardHeader from '@material-ui/core/CardHeader';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import { GreenCheckBox, YellowCheckBox, RedCheckBox } from './CheckState';
-import { GradeRounded } from '@material-ui/icons';
-
 
 interface ModalProps {
     updateModalIsOpen: boolean
@@ -49,11 +42,43 @@ const useStyles = makeStyles((theme: Theme) => ({
     deleteTagButton: {
         marginLeft: theme.spacing(1),
     },
+    button: {
+        background: theme.palette.primary.main,
+        color: 'white',
+        '&:hover': {
+            background: theme.palette.primary.dark,
+        },
+        margin: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        borderRadius: '8px',
+    },
+
+    closeButton: {
+        background: theme.palette.secondary.main,
+        color: 'white',
+        '&:hover': {
+            background: theme.palette.secondary.dark,
+        },
+        margin: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        borderRadius: '8px',
+    },
+
+    submitButton: {
+        background: theme.palette.primary.main,
+        color: 'white',
+        '&:hover': {
+            background: theme.palette.primary.dark,
+        },
+        margin: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        borderRadius: '8px',
+    },
 }));
 
-const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
+//theme.palette.secondary.main
 
-const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsOpen, recieveAllPhrases, currentPage, phrase, searchOptions }) => {
+const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsOpen, recieveAllPhrases, currentPage, phrase, searchOptions }) => {
     const { currentUser } = useContext(AuthContext);
     const [japanese, setJapanese] = useState<string>('');
     const [english, setEnglish] = useState<string>('');
@@ -108,7 +133,7 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
         setTags(updatedTags);
     };
 
-    const handleUpdatePhrase = async(phraseID: number, e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleUpdatePhrase = async (phraseID: number, e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
         if (currentUser?.id === undefined) {
@@ -134,8 +159,8 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
             setEnglish('');
             setTags([]);
             setUpdateModalIsOpen(false);
-        } catch(err: unknown) {
-            if(err instanceof Error) {
+        } catch (err: unknown) {
+            if (err instanceof Error) {
                 setAlertMessage(err.message);
                 setAlertMessageOpen(true);
             }
@@ -143,100 +168,98 @@ const UpdateModal:React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsO
     };
 
     return (
-        <>
-            <Modal isOpen={updateModalIsOpen}>
-                <Button onClick={() => setUpdateModalIsOpen(false)}>
+        <Modal isOpen={updateModalIsOpen} onRequestClose={() => setUpdateModalIsOpen(false)}>
+            <Box>
+                <Button onClick={() => setUpdateModalIsOpen(false)} className={classes.closeButton}>
                     <CloseIcon />
                 </Button>
-
-                <Button onClick={() => handleDeletePhrase(phrase.id)}>
+                <Button onClick={() => handleDeletePhrase(phrase.id)} className={classes.button}>
                     <DeleteIcon />
                 </Button>
+            </Box>
 
-                <form noValidate autoComplete='off'>
-                    <Card>
-                        <CardHeader title='フレーズの更新' />
-                        <CardContent>
-                            <TextField
-                                variant='outlined'
-                                required
-                                fullWidth
-                                label='日本語'
-                                value={japanese}
-                                margin='dense'
-                                onChange={(e) => setJapanese(e.target.value)}
-                            />
-                            <TextField
-                                variant='outlined'
-                                required
-                                fullWidth
-                                label='英語'
-                                value={english}
-                                margin='dense'
-                                onChange={(e) => setEnglish(e.target.value)}
-                            />
+            <h1>更新</h1>
+            <form noValidate autoComplete='off'>
+                <TextField
+                    variant='outlined'
+                    required
+                    fullWidth
+                    label='日本語'
+                    value={japanese}
+                    margin='dense'
+                    onChange={(e) => setJapanese(e.target.value)}
+                />
+                <TextField
+                    variant='outlined'
+                    required
+                    fullWidth
+                    label='英語'
+                    value={english}
+                    margin='dense'
+                    onChange={(e) => setEnglish(e.target.value)}
+                />
 
-                            <GreenCheckBox state={changeState1} isLock={false} toggleState={() => {
-                                setChangeState1(prev => !prev)
-                            }}/>
-                            <YellowCheckBox state={changeState2} isLock={false} toggleState={() => {
-                                setChangeState2(prev => !prev)
-                            }}/>            
-                            <RedCheckBox state={changeState3} isLock={false} toggleState={() => {
-                                setChangeState3(prev => !prev)
-                            }}/>
+                <Box>
+                    <GreenCheckBox state={changeState1} isLock={false} toggleState={() => {
+                        setChangeState1(prev => !prev)
+                    }} />
+                    <YellowCheckBox state={changeState2} isLock={false} toggleState={() => {
+                        setChangeState2(prev => !prev)
+                    }} />
+                    <RedCheckBox state={changeState3} isLock={false} toggleState={() => {
+                        setChangeState3(prev => !prev)
+                    }} />
+                </Box>
 
-                            <TextField
-                                variant='outlined'
-                                fullWidth
-                                label='新しいタグ'
-                                value={newTag}
-                                margin='dense'
-                                onChange={handleSetNewTag}
-                            />
-                            <Button
-                                variant='contained'
+                <TextField
+                    variant='outlined'
+                    fullWidth
+                    label='新しいタグ'
+                    value={newTag}
+                    margin='dense'
+                    onChange={handleSetNewTag}
+                />
+                <Button
+                    variant='contained'
+                    size='small'
+                    className={classes.button}
+                    onClick={handleAddTag}
+                >
+                    Add Tag
+                </Button>
+                <Box className={classes.tagBox}>
+                    {tags.map((tag, index) => (
+                        <div key={index} className={classes.tag}>
+                            {tag.name}
+                            <IconButton
                                 size='small'
-                                color='default'
-                                onClick={handleAddTag}
+                                className={classes.deleteTagButton}
+                                onClick={() => handleDeleteTag(index)}
                             >
-                                Add Tag
-                            </Button>
-                            <Box className={classes.tagBox}>
-                                {tags.map((tag, index) => (
-                                    <div key={index} className={classes.tag}>
-                                        {tag.name}
-                                        <IconButton
-                                            size='small'
-                                            className={classes.deleteTagButton}
-                                            onClick={() => handleDeleteTag(index)}
-                                        >
-                                            <DeleteIcon fontSize='small' />
-                                        </IconButton>
-                                    </div>
-                                ))}
-                            </Box>
-                            <Button
-                                type='submit'
-                                variant='contained'
-                                size='large'
-                                fullWidth
-                                color='default'
-                                disabled={!japanese || !english || !tags[0]}
-                                onClick={(e) => handleUpdatePhrase(phrase.id, e)}
-                            >
-                                Submit
-                            </Button>
-                            <Box textAlign='center'></Box>
-                        </CardContent>
-                    </Card>
-                </form>
-            </Modal>
-        </>
+                                <DeleteIcon fontSize='small' />
+                            </IconButton>
+                        </div>
+                    ))}
+                </Box>
+                <Button
+                    type='submit'
+                    variant='contained'
+                    size='large'
+                    fullWidth
+                    className={classes.submitButton}
+                    disabled={!japanese || !english || !tags[0]}
+                    onClick={(e) => handleUpdatePhrase(phrase.id, e)}
+                >
+                    更新
+                </Button>
+            </form>
+        </Modal>
     );
 };
 
 export default UpdateModal;
+
+
 
 
 

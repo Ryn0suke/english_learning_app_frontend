@@ -7,13 +7,12 @@ import { Tag } from 'interfaces';
 import { viewAllTags } from 'lib/api/cradTags';
 
 import { TextField, MenuItem, FormControl, InputLabel, Select, Checkbox, ListItemText, OutlinedInput, Button } from '@material-ui/core';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-import CardHeader from '@material-ui/core/CardHeader';
 import Box from '@material-ui/core/Box';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+
+import validate from 'components/utils/Validation';
 
 const useStyles = makeStyles((theme: Theme) => ({
     tagBox: {
@@ -32,6 +31,26 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
     deleteTagButton: {
         marginLeft: theme.spacing(1),
+    },
+    button: {
+        background: theme.palette.primary.main,
+        color: 'white',
+        '&:hover': {
+            background: theme.palette.primary.dark,
+        },
+        margin: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        borderRadius: '8px',
+    },
+    submitButton: {
+        background: theme.palette.primary.main,
+        color: 'white',
+        '&:hover': {
+            background: theme.palette.primary.dark,
+        },
+        margin: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        borderRadius: '8px',
     },
 }));
 
@@ -90,7 +109,6 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
         setNewTag('');
         setSelectedTags([]);
     };
-    
 
     const handleDeleteTag = (index: number) => {
         const updatedTags = tags.filter((_, i) => i !== index);
@@ -105,6 +123,11 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
 
     const handleCreateNewPhrase = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+
+        if(validate(japanese) || validate(english)) {
+            window.alert("文字数は50文字までです");
+            return;
+        }
 
         if (currentUser?.id === undefined) {
             console.log('User ID is undefined');
@@ -144,95 +167,90 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
     return (
         <>
             <form noValidate autoComplete='off'>
-                <Card>
-                    <CardHeader title='フレーズの登録' />
-                    <CardContent>
-                        <TextField
-                            variant='outlined'
-                            required
-                            fullWidth
-                            label='日本語'
-                            value={japanese}
-                            margin='dense'
-                            onChange={(e) => {setJapanese(e.target.value)}}
-                        />
-                        <TextField
-                            variant='outlined'
-                            required
-                            fullWidth
-                            label='英語'
-                            value={english}
-                            margin='dense'
-                            onChange={(e) => {setEnglish(e.target.value)}}
-                        />
-                        <FormControl fullWidth margin='dense' variant='outlined'>
-                            <InputLabel>登録されているタグ</InputLabel>
-                            <Select
-                                label="登録されているタグ"
-                                multiple
-                                value={selectedTags.map(tag => tag.name)}
-                                onChange={handleTagChange}
-                                input={<OutlinedInput label="登録されているタグ" />}
-                                renderValue={(selected) => (selected as string[]).join(', ')}
+                <h1>登録</h1>
+                <TextField
+                    variant='outlined'
+                    required
+                    fullWidth
+                    label='日本語'
+                    value={japanese}
+                    margin='dense'
+                    onChange={(e) => {setJapanese(e.target.value)}}
+                />
+                <TextField
+                    variant='outlined'
+                    required
+                    fullWidth
+                    label='英語'
+                    value={english}
+                    margin='dense'
+                    onChange={(e) => {setEnglish(e.target.value)}}
+                />
+                <FormControl fullWidth margin='dense' variant='outlined'>
+                    <InputLabel>登録されているタグ</InputLabel>
+                    <Select
+                        label="登録されているタグ"
+                        multiple
+                        value={selectedTags.map(tag => tag.name)}
+                        onChange={handleTagChange}
+                        input={<OutlinedInput label="登録されているタグ" />}
+                        renderValue={(selected) => (selected as string[]).join(', ')}
+                    >
+                        {registeredTag.map((tag) => (
+                            <MenuItem key={tag.id} value={tag.name}>
+                                <Checkbox checked={selectedTags.some(selectedTag => selectedTag.name === tag.name)} />
+                                <ListItemText primary={tag.name} />
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+                <TextField
+                    variant='outlined'
+                    fullWidth
+                    label='新しいタグ'
+                    value={newTag}
+                    margin='dense'
+                    onChange={handleSetNewTag}
+                />
+                <Button
+                    variant='contained'
+                    size='small'
+                    className={classes.button}
+                    onClick={handleAddTag}
+                >
+                    Add Tag
+                </Button>
+                <Box className={classes.tagBox}>
+                    {tags.map((tag, index) => (
+                        <div key={index} className={classes.tag}>
+                            {tag.name}
+                            <IconButton
+                                size='small'
+                                className={classes.deleteTagButton}
+                                onClick={() => handleDeleteTag(index)}
                             >
-                                {registeredTag.map((tag) => (
-                                    <MenuItem key={tag.id} value={tag.name}>
-                                        <Checkbox checked={selectedTags.some(selectedTag => selectedTag.name === tag.name)} />
-                                        <ListItemText primary={tag.name} />
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <TextField
-                            variant='outlined'
-                            fullWidth
-                            label='新しいタグ'
-                            value={newTag}
-                            margin='dense'
-                            onChange={handleSetNewTag}
-                        />
-                        <Button
-                            variant='contained'
-                            size='small'
-                            color='default'
-                            onClick={handleAddTag}
-                        >
-                            Add Tag
-                        </Button>
-                        <Box className={classes.tagBox}>
-                            {tags.map((tag, index) => (
-                                <div key={index} className={classes.tag}>
-                                    {tag.name}
-                                    <IconButton
-                                        size='small'
-                                        className={classes.deleteTagButton}
-                                        onClick={() => handleDeleteTag(index)}
-                                    >
-                                        <DeleteIcon fontSize='small' />
-                                    </IconButton>
-                                </div>
-                            ))}
-                        </Box>
-                        <Button
-                            type='submit'
-                            variant='contained'
-                            size='large'
-                            fullWidth
-                            color='default'
-                            disabled={!japanese || !english || tags.length === 0}
-                            onClick={handleCreateNewPhrase}
-                        >
-                            Submit
-                        </Button>
-                        <Box textAlign='center'></Box>
-                    </CardContent>
-                    <AlertMessage
-                        open={alertMessageOpen}
-                        setOpen={setAlertMessageOpen}
-                        severity='error'
-                        message={alertMessage}
-                    />
-                </Card>
+                                <DeleteIcon fontSize='small' />
+                            </IconButton>
+                        </div>
+                    ))}
+                </Box>
+                <Button
+                    type='submit'
+                    variant='contained'
+                    size='large'
+                    fullWidth
+                    className={classes.submitButton}
+                    disabled={!japanese || !english || tags.length === 0}
+                    onClick={handleCreateNewPhrase}
+                >
+                    登録
+                </Button>
+                <AlertMessage
+                    open={alertMessageOpen}
+                    setOpen={setAlertMessageOpen}
+                    severity='error'
+                    message={alertMessage}
+                />
             </form>
         </>
     );

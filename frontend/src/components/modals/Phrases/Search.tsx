@@ -4,8 +4,34 @@ import { AuthContext } from 'App';
 import { Tag, SearchOptions } from 'interfaces';
 import { TextField, MenuItem, FormControl, InputLabel, Select, Checkbox, ListItemText, OutlinedInput, Button, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import AlertMessage from 'components/utils/AlertMessage';
-import { GreenCheckBox, YellowCheckBox, RedCheckBox } from './CheckState';
+import { GreenCheckBox, YellowCheckBox, RedCheckBox, GreyCheckBox } from './CheckState';
 import { Box } from '@material-ui/core';
+import { makeStyles, Theme } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme: Theme) => ({
+  formControl: {
+    margin: theme.spacing(2),
+    minWidth: 120,
+  },
+  checkBoxContainer: {
+    display: 'flex',
+    gap: theme.spacing(1),
+  },
+  radioGroup: {
+    flexDirection: 'row',
+  },
+  button: {
+    background: theme.palette.primary.main,
+    color: 'white',
+    '&:hover': {
+      background: theme.palette.primary.dark,
+    },
+    margin: theme.spacing(1),
+    padding: theme.spacing(1, 2),
+    borderRadius: '8px',
+    //boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+  },
+}));
 
 interface recieveProps {
   recieveAllPhrases: (page: number, options: SearchOptions) => Promise<void>
@@ -15,8 +41,9 @@ interface recieveProps {
 };
 
 const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsOpen, searchOptions, setSearchOptions }) => {
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([{name: ''}]);
-  const [tags, setTags] = useState<Tag[]>([{name: ''}]);
+  const classes = useStyles();
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([{ name: '' }]);
+  const [tags, setTags] = useState<Tag[]>([{ name: '' }]);
   const { currentUser } = useContext(AuthContext);
   const [japanese, setJapanese] = useState<string>('');
   const [english, setEnglish] = useState<string>('');
@@ -26,6 +53,7 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
   const [changeState1, setChangeState1] = useState<boolean>(false);
   const [changeState2, setChangeState2] = useState<boolean>(false);
   const [changeState3, setChangeState3] = useState<boolean>(false);
+  const [changeState4, setChangeState4] = useState<boolean>(false);
 
   const recieveAllTags = async () => {
     try {
@@ -50,13 +78,44 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
     setSelectedTags(newSelectedTags);
   };
 
+  const handleChangeState1 = () => {
+    if (!changeState4) {
+      setChangeState1(prev => !prev)
+    } else {
+      return;
+    }
+  };
+
+  const handleChangeState2 = () => {
+    if (!changeState4) {
+      setChangeState2(prev => !prev)
+    } else {
+      return;
+    }
+  };
+
+  const handleChangeState3 = () => {
+    if (!changeState4) {
+      setChangeState3(prev => !prev)
+    } else {
+      return;
+    }
+  };
+
+  const removeCheckState = () => {
+    setChangeState4(prev => !prev);
+    setChangeState1(false);
+    setChangeState2(false);
+    setChangeState3(false);
+  };
+
   useEffect(() => {
     recieveAllTags();
   }, [currentUser]);
 
-  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    
+
     try {
       const updatedSearchOptions: SearchOptions = {
         ...searchOptions,
@@ -67,18 +126,19 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
         state1: changeState1,
         state2: changeState2,
         state3: changeState3,
+        state4: changeState4,
       };
       console.log(updatedSearchOptions);
       setSearchOptions(updatedSearchOptions);
       await recieveAllPhrases(1, updatedSearchOptions);
       setJapanese('');
       setEnglish('');
-      setSelectedTags([{name: ''}]);
+      setSelectedTags([{ name: '' }]);
       setRegisterModalIsOpen(false);
-    } catch(err: unknown) {
-      if(err instanceof Error) {
-          setAlertMessage(err.message);
-          setAlertMessageOpen(true);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setAlertMessage(err.message);
+        setAlertMessageOpen(true);
       }
     }
   };
@@ -87,7 +147,7 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
     <>
       <h1>検索オプション</h1>
       <form onSubmit={handleSubmit}>
-        <FormControl fullWidth>
+        <FormControl fullWidth className={classes.formControl}>
           <InputLabel id="selectbox-label">Tags</InputLabel>
           <Select
             labelId="selectbox-label"
@@ -108,52 +168,47 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
 
           <TextField
             variant="outlined"
-            // required
             fullWidth
             label="日本語"
             margin="dense"
             value={japanese}
-            onChange={(e) => {setJapanese(e.target.value)}}
+            onChange={(e) => { setJapanese(e.target.value) }}
           />
 
           <TextField
             variant="outlined"
-            // required
             fullWidth
             label="英語"
             margin="dense"
             value={english}
-            onChange={(e) => {setEnglish(e.target.value)}}
+            onChange={(e) => { setEnglish(e.target.value) }}
           />
 
-          <div style={ {display: 'flex'} }>
-            <GreenCheckBox state={changeState1} isLock={false} toggleState={() => {
-                                  setChangeState1(prev => !prev)}}/>
-            <YellowCheckBox state={changeState2} isLock={false} toggleState={() => {
-                                  setChangeState2(prev => !prev)}}/>
-            <RedCheckBox state={changeState3} isLock={false} toggleState={() => {
-                                  setChangeState3(prev => !prev)}}/>
+          <div className={classes.checkBoxContainer}>
+            <GreenCheckBox state={changeState1} isLock={false} toggleState={() => handleChangeState1()} />
+            <YellowCheckBox state={changeState2} isLock={false} toggleState={() => handleChangeState2()} />
+            <RedCheckBox state={changeState3} isLock={false} toggleState={() => handleChangeState3()} />
+            <GreyCheckBox state={changeState4} isLock={false} toggleState={() => removeCheckState()} />
           </div>
 
-          <RadioGroup value={isPartialMatch} onChange={(e) => setIsPartialMatch(e.target.value)}>
+          <RadioGroup value={isPartialMatch} onChange={(e) => setIsPartialMatch(e.target.value)} className={classes.radioGroup}>
             <FormControlLabel value="part" control={<Radio />} label="部分一致" />
             <FormControlLabel value="exact" control={<Radio />} label="完全一致" />
           </RadioGroup>
 
-          <Button type="submit" variant="contained" color="primary">
+          <Button type="submit" variant="contained" className={classes.button}>
             検索
           </Button>
         </FormControl>
       </form>
       <AlertMessage
-          open={alertMessageOpen}
-          setOpen={setAlertMessageOpen}
-          severity='error'
-          message={alertMessage}
+        open={alertMessageOpen}
+        setOpen={setAlertMessageOpen}
+        severity='error'
+        message={alertMessage}
       />
     </>
   );
 };
 
 export default Search;
-

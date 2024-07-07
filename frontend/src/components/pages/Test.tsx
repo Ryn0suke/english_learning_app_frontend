@@ -5,13 +5,14 @@ import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import { Typography } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import { Phrase } from 'interfaces';
+import SettingsIcon from '@material-ui/icons/Settings';
+import { Phrase, Tag, QuestionOptions } from 'interfaces';
 import SettingModal from 'components/modals/Test/SettingModal';
 import { GreenCheckBox, YellowCheckBox, RedCheckBox } from 'components/modals/Phrases/CheckState';
 import { updatePhrases, searchQuestion } from 'lib/api/cradPhrases';
 import Question from 'components/modals/Test/Question';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     display: 'flex',
     flexDirection: 'column',
@@ -19,6 +20,16 @@ const useStyles = makeStyles({
     alignItems: 'center',
     minWidth: 975,
     minHeight: 500,
+  },
+  button: {
+    background: theme.palette.primary.main,
+    color: 'white',
+    '&:hover': {
+        background: theme.palette.primary.dark,
+    },
+    margin: theme.spacing(1),
+    padding: theme.spacing(1, 2),
+    borderRadius: '8px',
   },
   bullet: {
     display: 'inline-block',
@@ -58,13 +69,12 @@ const useStyles = makeStyles({
     justifyContent: 'flex-end',
     paddingRight: 30,
   },
-});
+}));
 
 const Hambarger: React.FC = () => {
   const { currentUser } = useContext(AuthContext);
   const classes = useStyles();
   const [modalIsOpen, setModalIsOpen] = useState<boolean>(false);
-  const bull = <span className={classes.bullet}>•</span>;
   const [phrases, setPhrases] = useState<Phrase[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -75,6 +85,15 @@ const Hambarger: React.FC = () => {
   const [isJapaneseToEnglish, setIsJapaneseToEnglish] = useState<string>('japaneseToEnglish');
   const [isAnswer, setIsAnswer] = useState<boolean>(false);
 
+  //for settingModal.tsx
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([{ name: '' }]);
+  const [changeTestState1, setChangeTestState1] = useState<boolean>(false);
+  const [changeTestState2, setChangeTestState2] = useState<boolean>(false);
+  const [changeTestState3, setChangeTestState3] = useState<boolean>(false);
+  const [tags, setTags] = useState<Tag[]>([{ name: '' }]);
+  const [questionOptions, setQuestionOptions] = useState<QuestionOptions>({ tags: [{ name: '' }], numOfQuestions: 0, page: 1, isJapaneseToEnglish: true });
+  //for settingModal.tsx
+
   const handleNextQuestion = async () => {
     try {
       const updatedPhrase: Phrase = {
@@ -82,17 +101,72 @@ const Hambarger: React.FC = () => {
         state1: changeState1,
         state2: changeState2,
         state3: changeState3,
+      };
+  
+      const hasChanged = 
+        phrases[currentQuestion].state1 !== changeState1 ||
+        phrases[currentQuestion].state2 !== changeState2 ||
+        phrases[currentQuestion].state3 !== changeState3;
+  
+      if (hasChanged) {
+        const res = await updatePhrases(updatedPhrase.id, updatedPhrase);
+        console.log(res);
       }
-      const res = await updatePhrases(updatedPhrase.id, updatedPhrase);
+  
       setCurrentQuestion((prev: number) => prev + 1);
+      setIsAnswer(false);
     } catch (err) {
       console.log(err);
-    };
+    }
   };
 
-  const handleNextPage = async () => {
-    // Implementation for handling next page
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, isSettingModal: boolean) => {
+    if (event !== undefined) { event.preventDefault(); }
+
+    try {
+      if (!isSettingModal) { setCurrentPage(currentPage + 1); }
+      const newQuestionOptions: QuestionOptions = {
+        tags: selectedTags,
+        state1: changeTestState1,
+        state2: changeTestState2,
+        state3: changeTestState3,
+        numOfQuestions: numOfQuestions,
+        page: isSettingModal ? currentPage : currentPage + 1,
+        isJapaneseToEnglish: isJapaneseToEnglish === 'japaneseToEnglish' ? true : false
+      };
+
+      console.log(newQuestionOptions)
+
+      if (currentUser?.id === undefined) {
+        console.log('User ID is undefined');
+        return;
+      };
+
+      const res = await searchQuestion(currentUser.id, newQuestionOptions);
+      console.log(res);
+      setPhrases(res.data.phrases);
+      //if (res.data.phrases.length < numOfQuestions){setNumOfQuestions(res.data.phrases.length)};
+      setCurrentQuestion(0);
+      setModalIsOpen(false);
+    } catch (err) {
+      console.log(err);
+    }
   };
+
+  const finishQuestion = () => {
+    setCurrentQuestion(0);
+    setCurrentPage(0);
+    setNumOfQuestions(0);
+    setPhrases([]);
+    setSelectedTags([{ name: '' }]);
+    setIsAnswer(false);
+    setChangeState1(false);
+    setChangeState2(false);
+    setChangeState3(false);
+    setChangeTestState1(false);
+    setChangeTestState2(false);
+    setChangeTestState3(false);
+  }
 
   useEffect(() => {
     if (phrases[currentQuestion]) {
@@ -104,8 +178,9 @@ const Hambarger: React.FC = () => {
 
   return (
     <Card className={classes.root}>
-      <Button onClick={() => { setModalIsOpen(true) }} variant="contained">
-        出題設定
+      <Button className={classes.button} onClick={() => { setModalIsOpen(true) }} variant="contained">
+        {/* 出題設定 */}
+        <SettingsIcon />
       </Button>
       <SettingModal
         modalIsOpen={modalIsOpen}
@@ -117,59 +192,75 @@ const Hambarger: React.FC = () => {
         setIsJapaneseToEnglish={setIsJapaneseToEnglish}
         currentPage={currentPage}
         setCurrentQuestion={setCurrentQuestion}
+        selectedTags={selectedTags}
+        setSelectedTags={setSelectedTags}
+        changeState1={changeTestState1}
+        setChangeState1={setChangeTestState1}
+        changeState2={changeTestState2}
+        setChangeState2={setChangeTestState2}
+        changeState3={changeTestState3}
+        setChangeState3={setChangeTestState3}
+        tags={tags}
+        setTags={setTags}
+        questionOptions={questionOptions}
+        setQuestionOptions={setQuestionOptions}
+        handleSubmit={handleSubmit}
       />
 
       <CardContent>
-        <Card className={classes.question}>
-          <CardContent>
-            <Typography variant="h5" component="h2">
-              <div className={classes.question}>
-                <Question
-                  Phrases={phrases}
-                  currentQuestion={currentQuestion}
-                  isJapaneseToEnglish={isJapaneseToEnglish === 'japaneseToEnglish'}
-                  isAnswer={isAnswer}
+        <form onSubmit={(e) => handleSubmit(e, false)}>
+          <Card className={classes.question}>
+            <CardContent>
+              <Typography variant="h5" component="h2">
+                <div className={classes.question}>
+                  <Question
+                    Phrases={phrases}
+                    currentQuestion={currentQuestion}
+                    isJapaneseToEnglish={isJapaneseToEnglish === 'japaneseToEnglish'}
+                    isAnswer={isAnswer}
+                  />
+                </div>
+              </Typography>
+            </CardContent>
+            <div className={classes.checkboxButtonContainer}>
+              <div className={classes.checkboxContainer}>
+                <GreenCheckBox
+                  state={changeState1}
+                  isLock={false}
+                  toggleState={() => { setChangeState1(prev => !prev) }}
+                />
+                <YellowCheckBox
+                  state={changeState2}
+                  isLock={false}
+                  toggleState={() => { setChangeState2(prev => !prev) }}
+                />
+                <RedCheckBox
+                  state={changeState3}
+                  isLock={false}
+                  toggleState={() => { setChangeState3(prev => !prev) }}
                 />
               </div>
-            </Typography>
-          </CardContent>
-          <div className={classes.checkboxButtonContainer}>
-            <div className={classes.checkboxContainer}>
-              <GreenCheckBox
-                state={changeState1}
-                isLock={false}
-                toggleState={() => { setChangeState1(prev => !prev) }}
-              />
-              <YellowCheckBox
-                state={changeState2}
-                isLock={false}
-                toggleState={() => { setChangeState2(prev => !prev) }}
-              />
-              <RedCheckBox
-                state={changeState3}
-                isLock={false}
-                toggleState={() => { setChangeState3(prev => !prev) }}
-              />
+              <div className={classes.answerButtonContainer}>
+                <Button className={classes.button} variant="contained" onClick={() => { setIsAnswer((prev) => (!prev)) }} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>
+                  {isAnswer ? '問題に戻る' : '答えを見る'}
+                </Button>
+              </div>
             </div>
-            <div className={classes.answerButtonContainer}>
-              <Button variant="contained" onClick={() => {setIsAnswer((prev) => (!prev))}} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>
-                {isAnswer ? '問題に戻る' : '答えを見る'}
+          </Card>
+          <Button className={classes.button} variant="contained" onClick={finishQuestion} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>終了</Button>
+          {currentQuestion === (numOfQuestions - 1) ?
+            <>
+              <Button type="submit" className={classes.button} variant="contained" disabled={currentQuestion >= phrases.length}>
+                次の{numOfQuestions}問
               </Button>
-            </div>
-          </div>
-        </Card>
+            </>
+            :
+            <Button className={classes.button} type="button" variant="contained" onClick={handleNextQuestion} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>
+              次の問題
+            </Button>
+          }
+        </form>
       </CardContent>
-
-      {currentQuestion === (numOfQuestions - 1) ?
-        <Button variant="contained" onClick={handleNextPage}>
-          次の{numOfQuestions}問
-        </Button>
-        :
-        <Button variant="contained" onClick={handleNextQuestion} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>
-          次の問題
-        </Button>
-      }
-
     </Card>
   );
 };

@@ -13,27 +13,36 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import Chip from '@material-ui/core/Chip'
-
+import Chip from '@material-ui/core/Chip';
 
 import Modal from 'react-modal';
 import RegisterAndSearchModal from 'components/modals/Phrases/RegisterAndSearchModal';
 import UpdateModal from 'components/modals/Phrases/UpdateModal';
 import CheckState from 'components/modals/Phrases/CheckState';
 
-
-
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
     table: {
-      minWidth: 650,
+        minWidth: 650,
     },
     button: {
-        background: 'blue',
-        color: 'white'
+        background: theme.palette.primary.main,
+        color: 'white',
+        '&:hover': {
+            background: theme.palette.primary.dark,
+        },
+        margin: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        borderRadius: '8px',
     },
     currentPageButton: {
-        background: 'red',
-        color: 'white'
+        background: theme.palette.secondary.main,
+        color: 'white',
+        '&:hover': {
+            background: theme.palette.secondary.dark,
+        },
+        margin: theme.spacing(1),
+        padding: theme.spacing(1, 2),
+        borderRadius: '8px',
     },
     modal: {
         top: '20%',
@@ -43,11 +52,22 @@ const useStyles = makeStyles({
         marginRight: '-50%',
         transform: 'translate(-50%, -50%)',
         minWidth: '40%',
-    }
-  });
+    },
+    japaneseColumn: {
+        width: '200px', // 日本語列の固定幅
+    },
+    englishColumn: {
+        width: '200px', // 英語列の固定幅
+    },
+    checkStateColumn: {
+        width: '150px', // チェック状態列の固定幅
+    },
+    tagsColumn: {
+        width: '300px', // タグ列の固定幅
+    },
+}));
 
 const Phrases: React.FC = () => {
-
     const { currentUser } = useContext(AuthContext);
     const [phrases, setPhrases] = useState<Phrase[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -76,114 +96,88 @@ const Phrases: React.FC = () => {
         }
     };
 
-    // const handleDeletePhrase = async (id:number) => {
-    //     try {
-    //         if (currentUser?.id === undefined) {
-    //             console.log('User ID is undefined');
-    //             return;
-    //         }
-    //         const res = await destoyPhrases(id);
-    //         console.log(res);
-    //         await recieveAllPhrases(currentPage);
-    //     } catch (err) {
-    //         console.log(err);
-    //     }
-    // };
-
     const changeCurrentPage = (page:number) => {
         setCurrentPage(page);
     };
- 
 
     useEffect(() => {
         recieveAllPhrases(currentPage, searchOptions);
     }, [currentUser, currentPage, searchOptions]);
 
-    
     const classes = useStyles();
 
     console.log(currentUser);
 
     phrases.map((row) => {
-        // console.log(row.tags);
         if (row.tags !== undefined) {
             row.tags.map((tag) => {
                 console.log(tag.name);
             })
         }
-    })
+    });
 
     return (
         <>
-        <Button className={classes.button} onClick={() => setRegisterModalIsOpen(true)}>登録・検索</Button>
-        <Button className={classes.button} onClick={() => setSearchOptions({japanese: '', english: '', tags: [{name: ''}], isPartialMatch: true})}>検索解除</Button>
+            <Button className={classes.button} onClick={() => setRegisterModalIsOpen(true)}>登録・検索</Button>
+            <Button className={classes.button} onClick={() => setSearchOptions({japanese: '', english: '', tags: [{name: ''}], isPartialMatch: true})}>検索解除</Button>
 
-        <RegisterAndSearchModal registerModalIsOpen={registerModalIsOpen} setRegisterModalIsOpen={setRegisterModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} searchOptions={searchOptions} setSearchOptions={setSearchOptions}/>
+            <RegisterAndSearchModal registerModalIsOpen={registerModalIsOpen} setRegisterModalIsOpen={setRegisterModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} searchOptions={searchOptions} setSearchOptions={setSearchOptions}/>
 
-        <TableContainer component={Paper}>
-            <Table className={classes.table} aria-label='phrase table'>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>日本語</TableCell>
-                        <TableCell>英語</TableCell>
-                        <TableCell>チェック状態</TableCell>
-                        <TableCell>タグ</TableCell>
-                        {/* <TableCell>削除</TableCell> */}
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {phrases?.map((row) => (
-                        <TableRow key={row.id} onClick={() => {setUpdateModalIsOpen(true); setSelectedPhrase({id: row.id, japanese: row.japanese, english: row.english, state1: row.state1, state2: row.state2, state3: row.state3, tags: row.tags});}}>
-                            <TableCell component='th' scope='row'>
-                                {row.japanese}
-                            </TableCell>
-                            <TableCell component='th' scope='row'>
-                                {row.english}
-                            </TableCell>
-                            <TableCell>
-                                <CheckState state1={row.state1} state2={row.state2} state3={row.state3} isLock={true}/>
-                            </TableCell>
-                            <TableCell component='th' scope='row'>
-                            {row.tags !== undefined ? (
-                                <div>
-                                {row.tags.map((tag) => (
-                                    <Chip
-                                    key={tag.id}
-                                    label={tag.name}
-                                    style={{ marginRight: '8px', marginBottom: '4px' }}
-                                    />
-                                ))}
-                                </div>
-                            ) : (
-                                <div></div>
-                            )}
-                            </TableCell>
-
-
-
-                            {/* <TableCell>
-                                <Button className={classes.button} variant='contained' onClick={() => handleDeletePhrase(row.id)}>
-                                    <DeleteIcon />
-                                </Button>
-                            </TableCell> */}
+            <TableContainer component={Paper}>
+                <Table className={classes.table} aria-label='phrase table'>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell className={classes.japaneseColumn}>日本語</TableCell>
+                            <TableCell className={classes.englishColumn}>英語</TableCell>
+                            <TableCell className={classes.checkStateColumn}>チェック状態</TableCell>
+                            <TableCell className={classes.tagsColumn}>タグ</TableCell>
                         </TableRow>
-                    ))}
-                    <UpdateModal updateModalIsOpen={updateModalIsOpen} setUpdateModalIsOpen={setUpdateModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} phrase={selectedPhrase} searchOptions={searchOptions}/>
-                </TableBody>
-            </Table>
-        </TableContainer>
-        <Button onClick={() => changeCurrentPage(1)}>＜</Button>
-        {
-            pageNumbers.map((page) => {
-                return(
-                    <Button key={page} className={page===currentPage ? classes.currentPageButton : classes.button} onClick={() => changeCurrentPage(page)}>{page}</Button>
-                )
-
-            })
-        }
-        <Button onClick={() => changeCurrentPage(totalPage)}>＞</Button>
+                    </TableHead>
+                    <TableBody>
+                        {phrases?.map((row) => (
+                            <TableRow key={row.id} onClick={() => {setUpdateModalIsOpen(true); setSelectedPhrase({id: row.id, japanese: row.japanese, english: row.english, state1: row.state1, state2: row.state2, state3: row.state3, tags: row.tags});}}>
+                                <TableCell component='th' scope='row' className={classes.japaneseColumn}>
+                                    {row.japanese}
+                                </TableCell>
+                                <TableCell component='th' scope='row' className={classes.englishColumn}>
+                                    {row.english}
+                                </TableCell>
+                                <TableCell className={classes.checkStateColumn}>
+                                    <CheckState state1={row.state1} state2={row.state2} state3={row.state3} isLock={true}/>
+                                </TableCell>
+                                <TableCell component='th' scope='row' className={classes.tagsColumn}>
+                                    {row.tags !== undefined ? (
+                                        <div>
+                                            {row.tags.map((tag) => (
+                                                <Chip
+                                                    key={tag.id}
+                                                    label={tag.name}
+                                                    style={{ marginRight: '8px', marginBottom: '4px' }}
+                                                />
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div></div>
+                                    )}
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                        <UpdateModal updateModalIsOpen={updateModalIsOpen} setUpdateModalIsOpen={setUpdateModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} phrase={selectedPhrase} searchOptions={searchOptions}/>
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <Button onClick={() => changeCurrentPage(1)}>＜</Button>
+            {
+                pageNumbers.map((page) => {
+                    return (
+                        <Button key={page} className={page === currentPage ? classes.currentPageButton : classes.button} onClick={() => changeCurrentPage(page)}>{page}</Button>
+                    )
+                })
+            }
+            <Button onClick={() => changeCurrentPage(totalPage)}>＞</Button>
         </>
     );
 }
 
 export default Phrases;
+

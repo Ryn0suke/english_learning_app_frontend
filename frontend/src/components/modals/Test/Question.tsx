@@ -14,6 +14,11 @@ const Question: React.FC<Props> = ({ Phrases, currentQuestion, isJapaneseToEngli
         return <h3>出題設定を行ってください</h3>;
     }
 
+    // currentQuestion が Phrases 配列の範囲内かをチェック
+    if (currentQuestion < 0 || currentQuestion >= Phrases.length) {
+        return <h3>次の問題がありません</h3>;
+    }
+
     if(isJapaneseToEnglish) {
         return(
             <>
