@@ -59,3 +59,16 @@ export const searchQuestion = (id: number, questionOptions: QuestionOptions) => 
         }
     });
 };
+
+export const searchEnglishPhrases = (japanese:string) => {
+    return client.get(`searches/${japanese}`, {
+        params: {
+            japanese: japanese
+        },
+        headers: {
+            'access-token': Cookies.get('_access_token'),
+            'client': Cookies.get('_client'),
+            'uid': Cookies.get('_uid')
+        }
+    });
+};

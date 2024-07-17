@@ -11,6 +11,7 @@ import Phrases from 'components/pages/Phrases';
 
 import { getCurrentUser } from 'lib/api/auth';
 import { User } from 'interfaces/index';
+import SearchPhrases from 'components/pages/SearchPhrases';
 
 
 //全てのコンポーネントで使う変数
@@ -77,6 +78,7 @@ const App: React.FC = () => {
             <Route path='/signin' element={<SignIn />} />
             <Route path='/test' element={<Private><Test /></Private>} />
             <Route path='/phrases' element={<Private><Phrases /></Private>}/>
+            <Route path='/search' element={<Private><SearchPhrases /></Private>}/>
             {/* <Private>
               <Home />
             </Private> */}

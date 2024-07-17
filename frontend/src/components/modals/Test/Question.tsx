@@ -1,4 +1,4 @@
-import { Phrase } from "interfaces";
+import { Phrase } from 'interfaces';
 
 interface Props {
     Phrases: Phrase[]

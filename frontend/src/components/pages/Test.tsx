@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import { Typography } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
+import CommonButton from 'components/ui/Button';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { Phrase, Tag, QuestionOptions } from 'interfaces';
 import SettingModal from 'components/modals/Test/SettingModal';
@@ -20,27 +20,6 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     minWidth: 975,
     minHeight: 500,
-  },
-  button: {
-    background: theme.palette.primary.main,
-    color: 'white',
-    '&:hover': {
-        background: theme.palette.primary.dark,
-    },
-    margin: theme.spacing(1),
-    padding: theme.spacing(1, 2),
-    borderRadius: '8px',
-  },
-  bullet: {
-    display: 'inline-block',
-    margin: '0 2px',
-    transform: 'scale(0.8)',
-  },
-  title: {
-    fontSize: 14,
-  },
-  pos: {
-    marginBottom: 12,
   },
   question: {
     minWidth: 500,
@@ -120,7 +99,7 @@ const Hambarger: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>, isSettingModal: boolean) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>, isSettingModal: boolean) => {
     if (event !== undefined) { event.preventDefault(); }
 
     try {
@@ -178,20 +157,14 @@ const Hambarger: React.FC = () => {
 
   return (
     <Card className={classes.root}>
-      <Button className={classes.button} onClick={() => { setModalIsOpen(true) }} variant="contained">
-        {/* 出題設定 */}
-        <SettingsIcon />
-      </Button>
+      <CommonButton onClick={() => { setModalIsOpen(true) }} children={<SettingsIcon />} />
       <SettingModal
         modalIsOpen={modalIsOpen}
         setModalIsOpen={setModalIsOpen}
         numOfQuestions={numOfQuestions}
         setNumOfQuestions={setNumOfQuestions}
-        setPhrases={setPhrases}
         isJapaneseToEnglish={isJapaneseToEnglish}
         setIsJapaneseToEnglish={setIsJapaneseToEnglish}
-        currentPage={currentPage}
-        setCurrentQuestion={setCurrentQuestion}
         selectedTags={selectedTags}
         setSelectedTags={setSelectedTags}
         changeState1={changeTestState1}
@@ -202,16 +175,14 @@ const Hambarger: React.FC = () => {
         setChangeState3={setChangeTestState3}
         tags={tags}
         setTags={setTags}
-        questionOptions={questionOptions}
-        setQuestionOptions={setQuestionOptions}
         handleSubmit={handleSubmit}
       />
 
       <CardContent>
-        <form onSubmit={(e) => handleSubmit(e, false)}>
+        <form>
           <Card className={classes.question}>
             <CardContent>
-              <Typography variant="h5" component="h2">
+              <Typography variant='h5' component='h2'>
                 <div className={classes.question}>
                   <Question
                     Phrases={phrases}
@@ -241,23 +212,33 @@ const Hambarger: React.FC = () => {
                 />
               </div>
               <div className={classes.answerButtonContainer}>
-                <Button className={classes.button} variant="contained" onClick={() => { setIsAnswer((prev) => (!prev)) }} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>
-                  {isAnswer ? '問題に戻る' : '答えを見る'}
-                </Button>
+                <CommonButton 
+                  onClick={() => { setIsAnswer((prev) => (!prev)) }}
+                  children={isAnswer ? '問題に戻る' : '答えを見る'}
+                  disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}
+                />
               </div>
             </div>
           </Card>
-          <Button className={classes.button} variant="contained" onClick={finishQuestion} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>終了</Button>
+
+          <CommonButton
+            onClick={finishQuestion}
+            children='終了'
+            disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}
+          />
           {currentQuestion === (numOfQuestions - 1) ?
             <>
-              <Button type="submit" className={classes.button} variant="contained" disabled={currentQuestion >= phrases.length}>
-                次の{numOfQuestions}問
-              </Button>
+              <CommonButton
+                onClick={(e) => handleSubmit(e, false)}
+                children={`次の${numOfQuestions}問`}
+              />
             </>
             :
-            <Button className={classes.button} type="button" variant="contained" onClick={handleNextQuestion} disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}>
-              次の問題
-            </Button>
+            <CommonButton
+                onClick={handleNextQuestion}
+                children='次の問題'
+                disabled={currentQuestion < 0 || currentQuestion >= numOfQuestions}
+            />
           }
         </form>
       </CardContent>

@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Modal from 'react-modal';
-import Button from '@material-ui/core/Button';
 import { AuthContext } from 'App';
 import { Phrase, Tag, SearchOptions } from 'interfaces';
-
-import { viewAllPhrases, updatePhrases, destoyPhrases } from 'lib/api/cradPhrases';
-
+import { updatePhrases, destoyPhrases } from 'lib/api/cradPhrases';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
-
 import TextField from '@material-ui/core/TextField';
 import Box from '@material-ui/core/Box';
-import IconButton from '@material-ui/core/IconButton';
-import { makeStyles, Theme } from '@material-ui/core/styles';
 import { GreenCheckBox, YellowCheckBox, RedCheckBox } from './CheckState';
+import CommonButton from 'components/ui/Button';
+import JapaneseAndEnglishTextField from 'components/ui/JapaneseAndEnglishTextField';
+import AddedTagsBox from 'components/ui/AddedTagsBox';
+import TagList from 'components/ui/TagList';
+import AlertMessage from 'components/utils/AlertMessage';
+import { addTag, tagChange } from 'components/utils/TagRelatedFunc';
+import { FormControl, InputLabel } from '@material-ui/core';
+import { recieveAllTags } from 'components/utils/TagRelatedFunc';
 
 interface ModalProps {
     updateModalIsOpen: boolean
@@ -24,69 +26,16 @@ interface ModalProps {
     searchOptions: SearchOptions
 };
 
-const useStyles = makeStyles((theme: Theme) => ({
-    tagBox: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: theme.spacing(1),
-        marginTop: theme.spacing(2),
-        margin: theme.spacing(2),
-    },
-    tag: {
-        display: 'flex',
-        alignItems: 'center',
-        padding: theme.spacing(0.5, 1),
-        backgroundColor: theme.palette.grey[300],
-        borderRadius: theme.shape.borderRadius,
-    },
-    deleteTagButton: {
-        marginLeft: theme.spacing(1),
-    },
-    button: {
-        background: theme.palette.primary.main,
-        color: 'white',
-        '&:hover': {
-            background: theme.palette.primary.dark,
-        },
-        margin: theme.spacing(1),
-        padding: theme.spacing(1, 2),
-        borderRadius: '8px',
-    },
-
-    closeButton: {
-        background: theme.palette.secondary.main,
-        color: 'white',
-        '&:hover': {
-            background: theme.palette.secondary.dark,
-        },
-        margin: theme.spacing(1),
-        padding: theme.spacing(1, 2),
-        borderRadius: '8px',
-    },
-
-    submitButton: {
-        background: theme.palette.primary.main,
-        color: 'white',
-        '&:hover': {
-            background: theme.palette.primary.dark,
-        },
-        margin: theme.spacing(1),
-        padding: theme.spacing(1, 2),
-        borderRadius: '8px',
-    },
-}));
-
-//theme.palette.secondary.main
-
 const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsOpen, recieveAllPhrases, currentPage, phrase, searchOptions }) => {
     const { currentUser } = useContext(AuthContext);
     const [japanese, setJapanese] = useState<string>('');
     const [english, setEnglish] = useState<string>('');
     const [tags, setTags] = useState<Tag[]>([]);
     const [newTag, setNewTag] = useState<string>('');
+    const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+    const [registeredTag, setRegisteredTag] = useState<Tag[]>([]);
     const [alertMessageOpen, setAlertMessageOpen] = useState<boolean>(false);
     const [alertMessage, setAlertMessage] = useState<string>('');
-    const classes = useStyles();
     const [changeState1, setChangeState1] = useState<boolean>(false);
     const [changeState2, setChangeState2] = useState<boolean>(false);
     const [changeState3, setChangeState3] = useState<boolean>(false);
@@ -99,6 +48,10 @@ const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIs
         setChangeState2(phrase.state2);
         setChangeState3(phrase.state3);
     }, [phrase]);
+
+    useEffect(() => {
+        recieveAllTags(currentUser, setRegisteredTag);
+    }, [currentUser]);
 
     const handleDeletePhrase = async (id: number) => {
         try {
@@ -115,22 +68,16 @@ const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIs
         }
     };
 
-    const handleSetNewTag = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewTag(e.target.value);
-    };
-
     const handleAddTag = () => {
-        if (newTag && !tags.map(tag => tag.name).includes(newTag)) {
-            const newTagObj: Tag = { name: newTag };
-            setTags([...tags, newTagObj]);
-            setNewTag('');
-            console.log(newTag);
-        }
+        const newTags = addTag(newTag, tags, selectedTags);
+        setTags([...tags, ...newTags]);
+        setNewTag('');
+        setSelectedTags([]);
     };
 
-    const handleDeleteTag = (index: number) => {
-        const updatedTags = tags.filter((_, i) => i !== index);
-        setTags(updatedTags);
+    const handleTagChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+        const selectedTags = tagChange(event, registeredTag);
+        setSelectedTags(selectedTags);
     };
 
     const handleUpdatePhrase = async (phraseID: number, e: React.MouseEvent<HTMLButtonElement>) => {
@@ -148,7 +95,7 @@ const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIs
             state1: changeState1,
             state2: changeState2,
             state3: changeState3,
-            tags: tags // タグを追加
+            tags: tags
         };
 
         try {
@@ -170,46 +117,33 @@ const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIs
     return (
         <Modal isOpen={updateModalIsOpen} onRequestClose={() => setUpdateModalIsOpen(false)}>
             <Box>
-                <Button onClick={() => setUpdateModalIsOpen(false)} className={classes.closeButton}>
-                    <CloseIcon />
-                </Button>
-                <Button onClick={() => handleDeletePhrase(phrase.id)} className={classes.button}>
-                    <DeleteIcon />
-                </Button>
+                <CommonButton onClick={() => setUpdateModalIsOpen(false)} children={<CloseIcon />} color='secondary'/>
+                <CommonButton onClick={() => handleDeletePhrase(phrase.id)} children={<DeleteIcon />}/>
             </Box>
 
             <h1>更新</h1>
             <form noValidate autoComplete='off'>
-                <TextField
-                    variant='outlined'
-                    required
-                    fullWidth
-                    label='日本語'
-                    value={japanese}
-                    margin='dense'
-                    onChange={(e) => setJapanese(e.target.value)}
-                />
-                <TextField
-                    variant='outlined'
-                    required
-                    fullWidth
-                    label='英語'
-                    value={english}
-                    margin='dense'
-                    onChange={(e) => setEnglish(e.target.value)}
+                <JapaneseAndEnglishTextField 
+                    japanese={japanese}
+                    english={english}
+                    setJapanese={setJapanese}
+                    setEnglish={setEnglish}
                 />
 
                 <Box>
-                    <GreenCheckBox state={changeState1} isLock={false} toggleState={() => {
-                        setChangeState1(prev => !prev)
-                    }} />
-                    <YellowCheckBox state={changeState2} isLock={false} toggleState={() => {
-                        setChangeState2(prev => !prev)
-                    }} />
-                    <RedCheckBox state={changeState3} isLock={false} toggleState={() => {
-                        setChangeState3(prev => !prev)
-                    }} />
+                    <GreenCheckBox state={changeState1} isLock={false} toggleState={() => setChangeState1(prev => !prev)} />
+                    <YellowCheckBox state={changeState2} isLock={false} toggleState={() => setChangeState2(prev => !prev)} />
+                    <RedCheckBox state={changeState3} isLock={false} toggleState={() => setChangeState3(prev => !prev)} />
                 </Box>
+
+                <FormControl fullWidth margin='dense' variant='outlined'>
+                    <InputLabel>登録されているタグ</InputLabel>
+                    <TagList 
+                        selectedTags={selectedTags}
+                        registeredTag={registeredTag}
+                        handleTagChange={handleTagChange}
+                    />
+                </FormControl>
 
                 <TextField
                     variant='outlined'
@@ -217,126 +151,29 @@ const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIs
                     label='新しいタグ'
                     value={newTag}
                     margin='dense'
-                    onChange={handleSetNewTag}
+                    onChange={(e) => setNewTag(e.target.value)}
                 />
-                <Button
-                    variant='contained'
-                    size='small'
-                    className={classes.button}
-                    onClick={handleAddTag}
-                >
-                    Add Tag
-                </Button>
-                <Box className={classes.tagBox}>
-                    {tags.map((tag, index) => (
-                        <div key={index} className={classes.tag}>
-                            {tag.name}
-                            <IconButton
-                                size='small'
-                                className={classes.deleteTagButton}
-                                onClick={() => handleDeleteTag(index)}
-                            >
-                                <DeleteIcon fontSize='small' />
-                            </IconButton>
-                        </div>
-                    ))}
-                </Box>
-                <Button
-                    type='submit'
-                    variant='contained'
-                    size='large'
-                    fullWidth
-                    className={classes.submitButton}
-                    disabled={!japanese || !english || !tags[0]}
+
+                <CommonButton onClick={handleAddTag} children='タグを追加'/>
+
+                <AddedTagsBox tags={tags} setTags={setTags}/>
+
+                <CommonButton 
                     onClick={(e) => handleUpdatePhrase(phrase.id, e)}
-                >
-                    更新
-                </Button>
+                    children='更新'
+                    type='submit'
+                    fullWidth
+                    disabled={!japanese || !english || !tags[0]}
+                />
+                <AlertMessage
+                    open={alertMessageOpen}
+                    setOpen={setAlertMessageOpen}
+                    severity='error'
+                    message={alertMessage}
+                />
             </form>
         </Modal>
     );
 };
 
 export default UpdateModal;
-
-
-
-
-
-// UpdateModal.tsx
-// import React, { useState, useContext } from 'react';
-// import Modal from 'react-modal';
-// import Button from '@material-ui/core/Button';
-// import CloseIcon from '@material-ui/icons/Close';
-// import DeleteIcon from '@material-ui/icons/Delete';
-// import PhraseForm from './commonPart';
-// import { AuthContext } from 'App';
-// import { Phrase } from 'interfaces';
-// import { destoyPhrases } from 'lib/api/cradPhrases';
-// import { updatePhrases } from 'lib/api/cradPhrases';
-// import AlertMessage from 'components/utils/AlertMessage';
-
-// interface ModalProps {
-//   updateModalIsOpen: boolean;
-//   setUpdateModalIsOpen: (isOpen: boolean) => void;
-//   recieveAllPhrases: (page: number) => Promise<void>;
-//   currentPage: number;
-//   phrase: Phrase;
-// }
-
-// const UpdateModal: React.FC<ModalProps> = ({ updateModalIsOpen, setUpdateModalIsOpen, recieveAllPhrases, currentPage, phrase }) => {
-//   const { currentUser } = useContext(AuthContext);
-//   const [alertMessageOpen, setAlertMessageOpen] = useState<boolean>(false);
-//   const [alertMessage, setAlertMessage] = useState<string>('');
-
-//   const handleDeletePhrase = async (id: number) => {
-//     try {
-//       if (currentUser?.id === undefined) {
-//         console.log('User ID is undefined');
-//         return;
-//       }
-//       const res = await destoyPhrases(id);
-//       console.log(res);
-//       await recieveAllPhrases(currentPage);
-//       setUpdateModalIsOpen(false);
-//     } catch (err) {
-//       console.log(err);
-//     }
-//   };
-
-//   const handleUpdatePhrase = async (id:number, updatedPhrase: Phrase) => {
-//     console.log(updatedPhrase);
-//     try {
-//         const res = await updatePhrases(id, updatedPhrase);
-//         console.log(res);
-//         await recieveAllPhrases(currentPage);
-//       } catch (err: unknown) {
-//         if (err instanceof Error) {
-//           setAlertMessage(err.message);
-//           setAlertMessageOpen(true);
-//         }
-//       }
-//   };
-
-//   return (
-//     <>
-//       <Modal isOpen={updateModalIsOpen}>
-//         <Button onClick={() => setUpdateModalIsOpen(false)}>
-//           <CloseIcon />
-//         </Button>
-//         <Button onClick={() => handleDeletePhrase(phrase.id)}>
-//           <DeleteIcon />
-//         </Button>
-//         <PhraseForm
-//           initialJapanese={phrase.japanese}
-//           initialEnglish={phrase.english}
-//           initialTags={phrase.tags}
-//           onSubmit={handleUpdatePhrase}
-//           submitLabel='更新'
-//         />
-//       </Modal>
-//     </>
-//   );
-// };
-
-// export default UpdateModal;

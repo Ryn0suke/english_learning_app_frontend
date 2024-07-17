@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-//import { useNavigate } from 'react-router-dom';
 import { AuthContext } from 'App';
-import { viewAllPhrases, createNewPhrases, updatePhrases, destoyPhrases } from 'lib/api/cradPhrases';
+import { viewAllPhrases } from 'lib/api/cradPhrases';
 import { Phrase, SearchOptions, Tag } from 'interfaces';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -12,37 +11,17 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
 
-import Modal from 'react-modal';
 import RegisterAndSearchModal from 'components/modals/Phrases/RegisterAndSearchModal';
 import UpdateModal from 'components/modals/Phrases/UpdateModal';
 import CheckState from 'components/modals/Phrases/CheckState';
 
+import CommonButton from 'components/ui/Button';
+
 const useStyles = makeStyles((theme) => ({
     table: {
         minWidth: 650,
-    },
-    button: {
-        background: theme.palette.primary.main,
-        color: 'white',
-        '&:hover': {
-            background: theme.palette.primary.dark,
-        },
-        margin: theme.spacing(1),
-        padding: theme.spacing(1, 2),
-        borderRadius: '8px',
-    },
-    currentPageButton: {
-        background: theme.palette.secondary.main,
-        color: 'white',
-        '&:hover': {
-            background: theme.palette.secondary.dark,
-        },
-        margin: theme.spacing(1),
-        padding: theme.spacing(1, 2),
-        borderRadius: '8px',
     },
     modal: {
         top: '20%',
@@ -118,8 +97,8 @@ const Phrases: React.FC = () => {
 
     return (
         <>
-            <Button className={classes.button} onClick={() => setRegisterModalIsOpen(true)}>登録・検索</Button>
-            <Button className={classes.button} onClick={() => setSearchOptions({japanese: '', english: '', tags: [{name: ''}], isPartialMatch: true})}>検索解除</Button>
+            <CommonButton onClick={() => setRegisterModalIsOpen(true)} children='登録・検索'/>
+            <CommonButton onClick={() => setSearchOptions({japanese: '', english: '', tags: [{name: ''}], isPartialMatch: true})} children='検索解除'/>
 
             <RegisterAndSearchModal registerModalIsOpen={registerModalIsOpen} setRegisterModalIsOpen={setRegisterModalIsOpen} recieveAllPhrases={recieveAllPhrases} currentPage={currentPage} searchOptions={searchOptions} setSearchOptions={setSearchOptions}/>
 
@@ -166,15 +145,17 @@ const Phrases: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Button onClick={() => changeCurrentPage(1)}>＜</Button>
+            <CommonButton onClick={() => changeCurrentPage(1)} children='＜'/>
+
             {
                 pageNumbers.map((page) => {
                     return (
-                        <Button key={page} className={page === currentPage ? classes.currentPageButton : classes.button} onClick={() => changeCurrentPage(page)}>{page}</Button>
+                        // <Button key={page} className={page === currentPage ? classes.currentPageButton : classes.button} onClick={() => changeCurrentPage(page)}>{page}</Button>
+                        <CommonButton onClick={() => changeCurrentPage(page)} children={page} color={page === currentPage ? 'secondary' : 'primary'}/>
                     )
                 })
             }
-            <Button onClick={() => changeCurrentPage(totalPage)}>＞</Button>
+            <CommonButton onClick={() => changeCurrentPage(totalPage)} children='＞'/>
         </>
     );
 }

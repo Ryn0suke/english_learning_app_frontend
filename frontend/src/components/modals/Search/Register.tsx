@@ -1,28 +1,30 @@
 import React, { useState, useContext, useEffect } from 'react';
+import Modal from 'react-modal';
+import { Button, TextField, FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, OutlinedInput, Box, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 import { AuthContext } from 'App';
-import { Phrase, SearchOptions } from 'interfaces';
+import { Tag, Phrase } from 'interfaces';
+import { viewAllTags } from 'lib/api/cradTags';
 import { createNewPhrases } from 'lib/api/cradPhrases';
 import AlertMessage from 'components/utils/AlertMessage';
-import { Tag } from 'interfaces';
-import CommonButton from 'components/ui/Button';
-import AddedTagsBox from 'components/ui/AddedTagsBox';
+import validate from 'components/utils/Validation';
 import TagList from 'components/ui/TagList';
+import CommonButton from 'components/ui/Button';
 import JapaneseAndEnglishTextField from 'components/ui/JapaneseAndEnglishTextField';
-import { TextField, FormControl, InputLabel } from '@material-ui/core';
+import AddedTagsBox from 'components/ui/AddedTagsBox';
 import { addTag, tagChange } from 'components/utils/TagRelatedFunc';
 import { recieveAllTags } from 'components/utils/TagRelatedFunc';
-import validate from 'components/utils/Validation';
 
-interface recieveProps {
-    recieveAllPhrases: (page: number, options: SearchOptions) => Promise<void>
-    currentPage: number
-    searchOptions: SearchOptions
-};
+interface RegisterModalProps {
+    setModalIsOpen: (isOpen: boolean) => void;
+    modalIsOpen: boolean;
+    phrase: { japanese: string, english: string, explanation: string };
+}
 
-const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, searchOptions }) => {
+const RegisterModal: React.FC<RegisterModalProps> = ({ setModalIsOpen, modalIsOpen, phrase }) => {
     const { currentUser } = useContext(AuthContext);
-    const [japanese, setJapanese] = useState<string>('');
-    const [english, setEnglish] = useState<string>('');
+    const [japanese, setJapanese] = useState<string>(phrase.japanese);
+    const [english, setEnglish] = useState<string>(phrase.english);
     const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
     const [tags, setTags] = useState<Tag[]>([]);
     const [newTag, setNewTag] = useState<string>('');
@@ -46,7 +48,7 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
     const handleCreateNewPhrase = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
 
-        if(validate(japanese) || validate(english)) {
+        if (validate(japanese) || validate(english)) {
             window.alert('文字数は50文字までです');
             return;
         }
@@ -69,11 +71,11 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
         try {
             const res = await createNewPhrases(newPhrase);
             console.log(res);
-            await recieveAllPhrases(currentPage, searchOptions);
             setJapanese('');
             setEnglish('');
             setTags([]);
             setSelectedTags([]);
+            setModalIsOpen(false); // モーダルを閉じる
         } catch (err: unknown) {
             if (err instanceof Error) {
                 setAlertMessage(err.message);
@@ -83,13 +85,24 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
     };
 
     useEffect(() => {
+        setJapanese(phrase.japanese);
+        setEnglish(phrase.english);
+    }, [phrase.japanese, phrase.english]);
+
+    useEffect(() => {
         recieveAllTags(currentUser, setRegisteredTag);
     }, [currentUser]);
 
     return (
-        <>
+        <Modal
+            isOpen={modalIsOpen}
+            onRequestClose={() => setModalIsOpen(false)}
+            contentLabel='登録モーダル'
+        >
+            <CommonButton onClick={() => setModalIsOpen(false)} children={<CloseIcon />} color='secondary' />
+            <h1>{phrase.english}</h1>
+            <p>{phrase.explanation}</p>
             <form noValidate autoComplete='off'>
-                <h1>登録</h1>
                 <JapaneseAndEnglishTextField 
                     japanese={japanese}
                     english={english}
@@ -107,6 +120,7 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
                     />
 
                 </FormControl>
+
                 <TextField
                     variant='outlined'
                     fullWidth
@@ -123,13 +137,14 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
                     setTags={setTags}
                 />
 
-                <CommonButton
-                    onClick={handleCreateNewPhrase} 
-                    children='登録' 
+                <CommonButton 
+                    onClick={handleCreateNewPhrase}
+                    children='登録'
                     type='submit'
                     fullWidth
                     disabled={!japanese || !english || tags.length === 0}
                 />
+
                 <AlertMessage
                     open={alertMessageOpen}
                     setOpen={setAlertMessageOpen}
@@ -137,8 +152,8 @@ const Register: React.FC<recieveProps> = ({ recieveAllPhrases, currentPage, sear
                     message={alertMessage}
                 />
             </form>
-        </>
+        </Modal>
     );
 };
 
-export default Register;
+export default RegisterModal;

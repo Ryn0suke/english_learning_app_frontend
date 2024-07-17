@@ -87,11 +87,13 @@ const Header: React.FC = () => {
                                 <ListItem button component={Link} to="/phrases">
                                     <ListItemText primary="Phrases" />
                                 </ListItem>
+                                <ListItem button component={Link} to="/search">
+                                    <ListItemText primary="Search" />
+                                </ListItem>
                                 <ListItem button component={Link} to="/test">
                                     <ListItemText primary="Test" />
                                 </ListItem>  
                                 <ListItem button onClick={() => handleSignOut()}>
-                                    {/* <ExitToAppIcon /> */}
                                     <ListItemText primary="Sign out" />
                                 </ListItem>          
                             </>

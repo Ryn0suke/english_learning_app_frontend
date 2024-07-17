@@ -4,9 +4,12 @@ import { AuthContext } from 'App';
 import { Tag, SearchOptions } from 'interfaces';
 import { TextField, MenuItem, FormControl, InputLabel, Select, Checkbox, ListItemText, OutlinedInput, Button, RadioGroup, FormControlLabel, Radio } from '@material-ui/core';
 import AlertMessage from 'components/utils/AlertMessage';
+import CommonButton from 'components/ui/Button';
+import TagList from 'components/ui/TagList';
 import { GreenCheckBox, YellowCheckBox, RedCheckBox, GreyCheckBox } from './CheckState';
-import { Box } from '@material-ui/core';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import JapaneseAndEnglishTextField from 'components/ui/JapaneseAndEnglishTextField';
+import { recieveAllTags } from 'components/utils/TagRelatedFunc';
 
 const useStyles = makeStyles((theme: Theme) => ({
   formControl: {
@@ -19,17 +22,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   radioGroup: {
     flexDirection: 'row',
-  },
-  button: {
-    background: theme.palette.primary.main,
-    color: 'white',
-    '&:hover': {
-      background: theme.palette.primary.dark,
-    },
-    margin: theme.spacing(1),
-    padding: theme.spacing(1, 2),
-    borderRadius: '8px',
-    //boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
   },
 }));
 
@@ -55,21 +47,7 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
   const [changeState3, setChangeState3] = useState<boolean>(false);
   const [changeState4, setChangeState4] = useState<boolean>(false);
 
-  const recieveAllTags = async () => {
-    try {
-      if (currentUser?.id === undefined) {
-        console.log('User ID is undefined');
-        return;
-      }
-      const res = await viewAllTags(currentUser.id);
-      console.log(res);
-      setTags(res.data.tags);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+  const handleTagChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     const {
       target: { value },
     } = event;
@@ -110,10 +88,10 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
   };
 
   useEffect(() => {
-    recieveAllTags();
+    recieveAllTags(currentUser, setTags);
   }, [currentUser]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
     try {
@@ -146,42 +124,21 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
   return (
     <>
       <h1>検索オプション</h1>
-      <form onSubmit={handleSubmit}>
+      <form>
         <FormControl fullWidth className={classes.formControl}>
           <InputLabel id="selectbox-label">Tags</InputLabel>
-          <Select
-            labelId="selectbox-label"
-            id="selectbox"
-            multiple
-            value={selectedTags.map(tag => tag.name)}
-            onChange={handleChange}
-            input={<OutlinedInput label="Tags" />}
-            renderValue={(selected) => (selected as string[]).join(', ')}
-          >
-            {tags.map((tag) => (
-              <MenuItem key={tag.id} value={tag.name}>
-                <Checkbox checked={selectedTags.some(selectedTag => selectedTag.name === tag.name)} />
-                <ListItemText primary={tag.name} />
-              </MenuItem>
-            ))}
-          </Select>
 
-          <TextField
-            variant="outlined"
-            fullWidth
-            label="日本語"
-            margin="dense"
-            value={japanese}
-            onChange={(e) => { setJapanese(e.target.value) }}
+          <TagList 
+              selectedTags={selectedTags}
+              registeredTag={tags}
+              handleTagChange={handleTagChange}
           />
 
-          <TextField
-            variant="outlined"
-            fullWidth
-            label="英語"
-            margin="dense"
-            value={english}
-            onChange={(e) => { setEnglish(e.target.value) }}
+          <JapaneseAndEnglishTextField 
+            japanese={japanese}
+            english={english}
+            setJapanese={setJapanese}
+            setEnglish={setEnglish}
           />
 
           <div className={classes.checkBoxContainer}>
@@ -196,9 +153,7 @@ const Search: React.FC<recieveProps> = ({ recieveAllPhrases, setRegisterModalIsO
             <FormControlLabel value="exact" control={<Radio />} label="完全一致" />
           </RadioGroup>
 
-          <Button type="submit" variant="contained" className={classes.button}>
-            検索
-          </Button>
+          <CommonButton onClick={(e) => {handleSubmit(e)}} type='submit' children='検索' />
         </FormControl>
       </form>
       <AlertMessage
